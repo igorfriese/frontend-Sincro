@@ -1,0 +1,61 @@
+.cd-toolbar { display: flex; align-items: center; margin-bottom: 16px; }
+.cd-toolbar .kb-btn-new { margin-left: auto; }
+
+.sy-card:has(.cd-table) { overflow-x: auto; }
+.cd-table { width: 100%; border-collapse: collapse; }
+.cd-table th {
+  text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--sy-ink-soft); padding: 12px 20px; border-bottom: 1px solid var(--sy-line);
+}
+.cd-table td { padding: 14px 20px; border-bottom: 1px solid var(--sy-line); font-size: 13.5px; }
+.cd-table tr:last-child td { border-bottom: none; }
+.cd-table tr:hover td { background: var(--sy-bg); }
+
+.cd-acoes { display: flex; gap: 8px; justify-content: flex-end; }
+.cd-btn-icone {
+  background: transparent; border: 1px solid var(--sy-line); border-radius: 6px;
+  padding: 5px 10px; font-size: 12px; cursor: pointer; font-family: var(--sy-font-body);
+}
+.cd-btn-icone:hover { background: var(--sy-bg); }
+.cd-btn-icone.excluir { color: var(--sy-red); border-color: var(--sy-red-tint); }
+
+.cd-vazio { text-align: center; padding: 40px 20px; color: var(--sy-ink-soft); font-size: 13.5px; }
+
+.cd-modal-fundo {
+  display: none; position: fixed; inset: 0; background: rgba(30,27,46,.45);
+  align-items: center; justify-content: center; z-index: 50;
+}
+.cd-modal-fundo.aberto { display: flex; }
+.cd-modal { width: 360px; padding: 20px; }
+.cd-modal-botoes { display: flex; gap: 8px; margin-top: 4px; }
+.cd-modal-botoes .kb-btn-new { flex: 1; }
+.cd-modal-botoes .cancelar { background: var(--sy-line); color: var(--sy-ink); }
+
+/* ---- específico da tela de Colunas do Kanban ---- */
+.cl-swatch { width: 20px; height: 20px; border-radius: 5px; display: inline-block; vertical-align: middle; border: 1px solid var(--sy-line); }
+.cl-chave { font-family: var(--sy-font-mono); font-size: 11.5px; color: var(--sy-ink-soft); }
+.cl-ordem-btns { display: flex; flex-direction: column; gap: 2px; }
+.cl-ordem-btns button {
+  border: 1px solid var(--sy-line); background: var(--sy-surface); border-radius: 4px;
+  width: 22px; height: 18px; font-size: 10px; cursor: pointer; line-height: 1; padding: 0;
+}
+.cl-ordem-btns button:hover { background: var(--sy-bg); }
+.cl-ordem-btns button:disabled { opacity: 0.3; cursor: default; }
+.cl-cor-opcoes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.cl-cor-opcao {
+  width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent;
+}
+.cl-cor-opcao.selecionada { border-color: var(--sy-ink); }
+
+/* ---- autocomplete (busca de cliente/produto no cadastro de ordem) ---- */
+.ac-wrap { position: relative; }
+.ac-lista {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 20;
+  background: var(--sy-surface); border: 1px solid var(--sy-line); border-radius: 8px;
+  margin-top: 4px; max-height: 220px; overflow-y: auto;
+  box-shadow: var(--sy-shadow);
+}
+.ac-item { padding: 9px 12px; font-size: 13.5px; cursor: pointer; display: flex; justify-content: space-between; gap: 10px; }
+.ac-item:hover { background: var(--sy-bg); }
+.ac-item-codigo { font-family: var(--sy-font-mono); font-size: 11px; color: var(--sy-ink-soft); flex-shrink: 0; }
+.ac-vazio { padding: 10px 12px; font-size: 13px; color: var(--sy-ink-soft); }

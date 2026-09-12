@@ -1,0 +1,208 @@
+:root {
+  --sy-purple-900: #221c46;
+  --sy-purple-800: #2c2560;
+  --sy-purple-700: #3c3489;
+  --sy-purple-500: #5b4fc9;
+  --sy-purple-300: #9b90e8;
+  --sy-purple-100: #edebfa;
+
+  --sy-bg: #f6f5fb;
+  --sy-surface: #ffffff;
+  --sy-ink: #1e1b2e;
+  --sy-ink-soft: #6b6580;
+  --sy-line: #e4e1f0;
+
+  --sy-green: #1d9e75;
+  --sy-green-tint: #e3f6ef;
+  --sy-amber: #b06a12;
+  --sy-amber-tint: #fbf0dd;
+  --sy-red: #c53434;
+  --sy-red-tint: #fbe9e9;
+  --sy-blue: #3865c9;
+  --sy-blue-tint: #e9eefb;
+
+  --sy-font-display: 'Sora', sans-serif;
+  --sy-font-body: 'Inter', sans-serif;
+  --sy-font-mono: 'JetBrains Mono', monospace;
+
+  --sy-radius: 14px;
+  --sy-radius-sm: 8px;
+  --sy-shadow: 0 1px 2px rgba(34, 28, 70, 0.04), 0 8px 24px rgba(34, 28, 70, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--sy-font-body);
+  background: var(--sy-bg);
+  color: var(--sy-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.sy-shell {
+  display: grid;
+  grid-template-columns: 264px 1fr;
+  min-height: 100vh;
+}
+
+.sy-sidebar {
+  background: var(--sy-purple-900);
+  color: #fff;
+  padding: 24px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sy-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; }
+.sy-brand-mark { width: 34px; height: 34px; flex-shrink: 0; }
+.sy-brand-name { font-family: var(--sy-font-display); font-weight: 700; font-size: 18px; }
+
+.sy-nav-group { display: flex; flex-direction: column; gap: 2px; }
+.sy-nav-label {
+  font-family: var(--sy-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sy-purple-300);
+  padding: 0 12px;
+  margin: 14px 0 6px;
+}
+
+.sy-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: var(--sy-radius-sm);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.78);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.sy-nav-item:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+.sy-nav-item.active { background: var(--sy-purple-500); color: #fff; }
+
+.sy-sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+
+.sy-main { display: flex; flex-direction: column; min-width: 0; }
+
+.sy-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  background: var(--sy-surface);
+  border-bottom: 1px solid var(--sy-line);
+}
+.sy-topbar h1 { font-family: var(--sy-font-display); font-size: 20px; margin: 0; }
+.sy-topbar-sub { font-size: 13px; color: var(--sy-ink-soft); margin-top: 2px; }
+
+.sy-user-chip {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 10px 6px 6px; border-radius: 999px; border: 1px solid var(--sy-line);
+}
+.sy-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--sy-purple-500); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--sy-font-display); font-weight: 700; font-size: 13px;
+}
+.sy-user-role {
+  font-size: 10.5px; font-family: var(--sy-font-mono);
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--sy-ink-soft);
+}
+
+.sy-content { padding: 28px 32px 40px; flex: 1; }
+
+.sy-card { background: var(--sy-surface); border: 1px solid var(--sy-line); border-radius: var(--sy-radius); box-shadow: var(--sy-shadow); }
+.sy-card-header { display: flex; align-items: baseline; justify-content: space-between; padding: 18px 20px 0; }
+.sy-card-title { font-family: var(--sy-font-display); font-size: 14.5px; font-weight: 600; margin: 0; }
+.sy-card-link { font-size: 12.5px; color: var(--sy-purple-500); font-weight: 600; }
+
+.sy-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+}
+.sy-badge-green { background: var(--sy-green-tint); color: var(--sy-green); }
+.sy-badge-amber { background: var(--sy-amber-tint); color: var(--sy-amber); }
+.sy-badge-red   { background: var(--sy-red-tint);   color: var(--sy-red); }
+.sy-badge-blue  { background: var(--sy-blue-tint);  color: var(--sy-blue); }
+.sy-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.sy-erro-banner {
+  background: var(--sy-red-tint);
+  color: var(--sy-red);
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: var(--sy-radius-sm);
+  margin-bottom: 16px;
+}
+
+.sy-menu-toggle { display: none; }
+.sy-sidebar-backdrop { display: none; }
+
+/* ---- Sidebar vira menu off-canvas em telas estreitas ---- */
+@media (max-width: 860px) {
+  .sy-shell { grid-template-columns: 1fr; }
+
+  .sy-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 40;
+    width: 264px;
+    max-width: 82vw;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+  .sy-sidebar.aberta { transform: translateX(0); }
+
+  .sy-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 16, 40, 0.45);
+    z-index: 30;
+  }
+  .sy-sidebar-backdrop.aberta { display: block; }
+
+  .sy-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--sy-radius-sm);
+    border: 1px solid var(--sy-line);
+    background: var(--sy-surface);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .sy-topbar { padding: 14px 16px; gap: 10px; }
+  .sy-topbar h1 { font-size: 17px; }
+  .sy-content { padding: 18px 16px 32px; }
+  .sy-user-chip > div:last-child { display: none; }
+}
+
+/* ---- Indicador de pedido urgente ---- */
+.badge-urgente {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--sy-red);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px 3px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
