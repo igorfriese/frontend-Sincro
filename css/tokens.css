@@ -92,12 +92,13 @@ button {
 .sy-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0px;
   padding: 4px 11px 12px;
 }
 .sy-brand-mark {
-  width: 34px;
-  height: 34px;
+  width: 180px;
+  height: auto;
+  margin: -20px 0 -20px -52px;
   flex-shrink: 0;
   object-fit: contain;
   filter: drop-shadow(0 5px 10px rgba(108, 92, 231, 0.28));
@@ -106,6 +107,7 @@ button {
   font-family: var(--sy-font-display);
   font-weight: 700;
   font-size: 18px;
+  margin-left: -64px;
   letter-spacing: -0.03em;
 }
 .sy-nav-group {
@@ -446,10 +448,10 @@ button {
    ================================================================ */
 .reveal-on-scroll {
   opacity: 0;
-  transform: translateY(28px) scale(0.985);
+  transform: translateY(30px);
   transition:
-    opacity 0.72s cubic-bezier(0.2, 0.75, 0.25, 1),
-    transform 0.72s cubic-bezier(0.2, 0.75, 0.25, 1);
+    opacity 1s ease,
+    transform 1s ease;
 }
 .reveal-on-scroll.is-visible {
   opacity: 1;
@@ -459,15 +461,15 @@ button {
 .ld-feature:nth-child(2),
 .ld-passo:nth-child(2),
 .ld-plano:nth-child(2) {
-  transition-delay: 0.08s;
+  transition-delay: 0.15s;
 }
 .ld-feature:nth-child(3),
 .ld-passo:nth-child(3),
 .ld-plano:nth-child(3) {
-  transition-delay: 0.16s;
+  transition-delay: 0.3s;
 }
 .ld-feature:nth-child(4) {
-  transition-delay: 0.24s;
+  transition-delay: 0.45s;
 }
 
 :focus-visible {

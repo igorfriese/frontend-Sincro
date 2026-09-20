@@ -267,7 +267,7 @@ function montarLayout({ itemAtivo, titulo, subtitulo }) {
     <div class="sy-sidebar-backdrop" id="sySidebarBackdrop" aria-hidden="true"></div>
     <aside class="sy-sidebar" id="sySidebar" aria-label="Menu principal">
       <div class="sy-brand">
-        <img class="sy-brand-mark" src="assets/Bola.png" alt="">
+        <img class="sy-brand-mark" src="assets/Bola.3.png" alt="">
         <span class="sy-brand-name">Sincro</span>
       </div>
       <nav class="sy-sidebar-nav" aria-label="Navegação do sistema">${navHtml}</nav>

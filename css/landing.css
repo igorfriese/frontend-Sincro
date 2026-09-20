@@ -64,12 +64,13 @@
 .ld-brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 0px;
   flex-shrink: 0;
 }
 .ld-brand-mark {
-  width: 120px;
-  height: 120px;
+  width: 180px;
+  height: auto;
+  margin-block: -20px;
   object-fit: contain;
   filter: drop-shadow(0 8px 16px rgba(108, 92, 231, 0.22));
 }
@@ -81,6 +82,7 @@
   font-family: var(--sy-font-display);
   font-weight: 700;
   font-size: 18px;
+  margin-left: -64px;
   letter-spacing: -0.04em;
   color: var(--sy-purple-900);
 }
@@ -387,8 +389,9 @@
 
 .ld-features {
   display: grid;
+  gap: 20px;
+  flex-wrap: wrap;
   grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
 }
 .ld-feature {
   position: relative;
@@ -706,6 +709,16 @@
   gap: 18px;
   border-top: 1px solid var(--sy-line);
 }
+
+.ld-footer .ld-brand {
+  display: flex;
+  align-items: center;
+}
+
+.ld-footer .ld-brand-name {
+  margin-left: -64px;
+}
+
 .ld-footer-nota {
   margin: 0;
   color: var(--sy-ink-muted);
