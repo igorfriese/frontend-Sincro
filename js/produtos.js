@@ -2,7 +2,11 @@ let produtosCache = [];
 let editandoIdProduto = null;
 
 async function iniciarProdutos() {
-  const usuario = montarLayout({ itemAtivo: "produtos", titulo: "Produtos / Modelos", subtitulo: "Modelos de peça produzidos pela facção" });
+  const usuario = montarLayout({
+    itemAtivo: "produtos",
+    titulo: "Produtos / Modelos",
+    subtitulo: "Modelos de peça produzidos pela facção",
+  });
   if (!usuario) return;
 
   document.getElementById("page-content").innerHTML = `
@@ -32,8 +36,14 @@ async function iniciarProdutos() {
     </div>
   `;
 
-  document.getElementById("btnNovo").addEventListener("click", () => abrirModal());
-  document.getElementById("btnCancelar").addEventListener("click", () => document.getElementById("modalFundo").classList.remove("aberto"));
+  document
+    .getElementById("btnNovo")
+    .addEventListener("click", () => abrirModal());
+  document
+    .getElementById("btnCancelar")
+    .addEventListener("click", () =>
+      document.getElementById("modalFundo").classList.remove("aberto"),
+    );
   document.getElementById("btnSalvar").addEventListener("click", salvar);
   document.getElementById("fBusca").addEventListener("input", renderizarTabela);
 
@@ -54,16 +64,24 @@ async function carregar() {
 }
 
 function renderizarTabela() {
-  const termo = (document.getElementById("fBusca").value || "").trim().toLowerCase();
+  const termo = (document.getElementById("fBusca").value || "")
+    .trim()
+    .toLowerCase();
   const corpo = document.getElementById("corpoTabela");
   const vazio = document.getElementById("vazio");
   corpo.innerHTML = "";
 
-  const filtrados = produtosCache.filter((p) =>
-    !termo || p.nome.toLowerCase().includes(termo) || (p.codigo || "").toLowerCase().includes(termo)
+  const filtrados = produtosCache.filter(
+    (p) =>
+      !termo ||
+      p.nome.toLowerCase().includes(termo) ||
+      (p.codigo || "").toLowerCase().includes(termo),
   );
 
-  if (filtrados.length === 0) { vazio.style.display = "block"; return; }
+  if (filtrados.length === 0) {
+    vazio.style.display = "block";
+    return;
+  }
   vazio.style.display = "none";
 
   filtrados.forEach((p) => {
@@ -81,14 +99,24 @@ function renderizarTabela() {
     corpo.appendChild(tr);
   });
 
-  corpo.querySelectorAll('[data-acao="editar"]').forEach((btn) => btn.addEventListener("click", () => abrirModal(btn.dataset.id)));
-  corpo.querySelectorAll('[data-acao="excluir"]').forEach((btn) => btn.addEventListener("click", () => excluir(btn.dataset.id)));
+  corpo
+    .querySelectorAll('[data-acao="editar"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () => abrirModal(btn.dataset.id)),
+    );
+  corpo
+    .querySelectorAll('[data-acao="excluir"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () => excluir(btn.dataset.id)),
+    );
 }
 
 function abrirModal(id = null) {
   editandoIdProduto = id;
   const produto = id ? produtosCache.find((p) => p.id === id) : null;
-  document.getElementById("modalTitulo").textContent = id ? "Editar produto" : "Novo produto";
+  document.getElementById("modalTitulo").textContent = id
+    ? "Editar produto"
+    : "Novo produto";
   document.getElementById("fNome").value = produto?.nome || "";
   document.getElementById("fPreco").value = produto?.precoBase || "";
   document.getElementById("modalFundo").classList.add("aberto");
@@ -99,13 +127,17 @@ async function salvar() {
     nome: document.getElementById("fNome").value.trim(),
     precoBase: Number(document.getElementById("fPreco").value) || 0,
   };
-  if (!dados.nome) { alert("O nome é obrigatório."); return; }
+  if (!dados.nome) {
+    alert("O nome é obrigatório.");
+    return;
+  }
 
   const botao = document.getElementById("btnSalvar");
   botao.disabled = true;
   botao.textContent = "Salvando...";
   try {
-    if (editandoIdProduto) await apiAtualizarItem("produtos", editandoIdProduto, dados);
+    if (editandoIdProduto)
+      await apiAtualizarItem("produtos", editandoIdProduto, dados);
     else await apiCriarItem("produtos", dados);
     document.getElementById("modalFundo").classList.remove("aberto");
     await carregar();
@@ -122,7 +154,9 @@ async function excluir(id) {
   const pedidos = await apiListarTodosPedidos();
   const qtdPedidos = pedidos.filter((p) => p.modelo === produto.nome).length;
   if (qtdPedidos > 0) {
-    alert(`Não é possível excluir "${produto.nome}": existem ${qtdPedidos} pedido(s) usando esse modelo.`);
+    alert(
+      `Não é possível excluir "${produto.nome}": existem ${qtdPedidos} pedido(s) usando esse modelo.`,
+    );
     return;
   }
 

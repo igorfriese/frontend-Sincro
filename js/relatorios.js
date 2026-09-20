@@ -3,11 +3,16 @@ let etapaFinalNomeCache = "";
 let ultimoConjuntoFiltrado = []; // guardado pra reaproveitar na exportação sem recalcular
 
 async function iniciarRelatorios() {
-  usuarioRelatorios = montarLayout({ itemAtivo: "relatorios", titulo: "Relatórios", subtitulo: "Produção e pontualidade por período" });
+  usuarioRelatorios = montarLayout({
+    itemAtivo: "relatorios",
+    titulo: "Relatórios",
+    subtitulo: "Produção e pontualidade por período",
+  });
   if (!usuarioRelatorios) return;
 
   if (!["Administrador", "Gestor"].includes(usuarioRelatorios.perfil)) {
-    document.getElementById("page-content").innerHTML = `<div class="sy-erro-banner">Esta tela é restrita aos perfis Administrador e Gestor.</div>`;
+    document.getElementById("page-content").innerHTML =
+      `<div class="sy-erro-banner">Esta tela é restrita aos perfis Administrador e Gestor.</div>`;
     return;
   }
 
@@ -31,7 +36,9 @@ async function iniciarRelatorios() {
     <div id="rlConteudo"><div class="sy-card" style="padding:20px;">Carregando...</div></div>
   `;
 
-  document.getElementById("rlAplicar").addEventListener("click", () => carregarRelatorio());
+  document
+    .getElementById("rlAplicar")
+    .addEventListener("click", () => carregarRelatorio());
   document.getElementById("rlLimpar").addEventListener("click", () => {
     document.getElementById("rlDataDe").value = "";
     document.getElementById("rlDataAte").value = "";
@@ -105,31 +112,47 @@ function renderizarRelatorio(pedidos) {
   }
 
   const totalProduzido = pedidos.reduce((s, p) => s + Number(p.qtd), 0);
-  const pontuais = pedidos.filter((p) => new Date(p.concluidoEm) <= new Date(p.prazo + "T23:59:59"));
+  const pontuais = pedidos.filter(
+    (p) => new Date(p.concluidoEm) <= new Date(p.prazo + "T23:59:59"),
+  );
   const atrasados = pedidos.filter((p) => !pontuais.includes(p));
-  const percentualPontualidade = Math.round((pontuais.length / pedidos.length) * 100);
+  const percentualPontualidade = Math.round(
+    (pontuais.length / pedidos.length) * 100,
+  );
 
   const comTempoDeProducao = pedidos.filter((p) => p.iniciadoEm);
   const tempoMedioDias = comTempoDeProducao.length
     ? Math.round(
-        comTempoDeProducao.reduce((s, p) => s + (new Date(p.concluidoEm) - new Date(p.iniciadoEm)), 0) /
-        comTempoDeProducao.length / 86400000
+        comTempoDeProducao.reduce(
+          (s, p) => s + (new Date(p.concluidoEm) - new Date(p.iniciadoEm)),
+          0,
+        ) /
+          comTempoDeProducao.length /
+          86400000,
       )
     : null;
 
   // Produção por cliente (top 6), pra o gráfico de barras
   const porCliente = {};
-  pedidos.forEach((p) => { porCliente[p.cliente] = (porCliente[p.cliente] || 0) + Number(p.qtd); });
-  const rankingClientes = Object.entries(porCliente).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  pedidos.forEach((p) => {
+    porCliente[p.cliente] = (porCliente[p.cliente] || 0) + Number(p.qtd);
+  });
+  const rankingClientes = Object.entries(porCliente)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
   const maiorValorCliente = rankingClientes[0]?.[1] || 1;
 
-  const barrasHtml = rankingClientes.map(([cliente, qtd]) => `
+  const barrasHtml = rankingClientes
+    .map(
+      ([cliente, qtd]) => `
     <div class="rl-bar-row">
       <div class="rl-bar-label">${cliente}</div>
       <div class="rl-bar-track"><div class="rl-bar-fill" style="width:${(qtd / maiorValorCliente) * 100}%;"></div></div>
       <div class="rl-bar-valor">${qtd.toLocaleString("pt-BR")} un.</div>
     </div>
-  `).join("");
+  `,
+    )
+    .join("");
 
   const linhasTabela = pedidos
     .slice()
@@ -149,7 +172,8 @@ function renderizarRelatorio(pedidos) {
           <td>${formatarDataCurta(p.concluidoEm)}</td>
           <td>${badge}</td>
         </tr>`;
-    }).join("");
+    })
+    .join("");
 
   conteudo.innerHTML = `
     <div class="rl-metrics">
@@ -196,7 +220,15 @@ function exportarCsv() {
     return;
   }
 
-  const cabecalho = ["OP", "Cliente", "Modelo", "Quantidade", "Prazo", "Concluido_em", "Situacao"];
+  const cabecalho = [
+    "OP",
+    "Cliente",
+    "Modelo",
+    "Quantidade",
+    "Prazo",
+    "Concluido_em",
+    "Situacao",
+  ];
   const linhas = ultimoConjuntoFiltrado.map((p) => {
     const pontual = new Date(p.concluidoEm) <= new Date(p.prazo + "T23:59:59");
     return [
@@ -207,7 +239,9 @@ function exportarCsv() {
       p.prazo,
       p.concluidoEm.split("T")[0],
       pontual ? "No prazo" : "Atrasado",
-    ].map((valor) => `"${String(valor).replace(/"/g, '""')}"`).join(";");
+    ]
+      .map((valor) => `"${String(valor).replace(/"/g, '""')}"`)
+      .join(";");
   });
 
   const csv = [cabecalho.join(";"), ...linhas].join("\r\n");

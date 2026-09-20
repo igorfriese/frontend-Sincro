@@ -20,7 +20,11 @@ async function iniciarPortalCliente() {
 }
 
 function desenharPortal(cliente, pedidos) {
-  const abertos = pedidos.filter((p) => severidadePrazo(p.prazo) !== "ok" || p.coluna !== etapasPortal[etapasPortal.length - 1]?.chave);
+  const abertos = pedidos.filter(
+    (p) =>
+      severidadePrazo(p.prazo) !== "ok" ||
+      p.coluna !== etapasPortal[etapasPortal.length - 1]?.chave,
+  );
 
   const listaHtml = pedidos.length
     ? pedidos.map((p) => criarLinhaPedido(p)).join("")
@@ -43,7 +47,12 @@ function desenharPortal(cliente, pedidos) {
 
 function criarLinhaPedido(pedido) {
   const sev = severidadePrazo(pedido.prazo);
-  const badgeClasse = sev === "red" ? "sy-badge-red" : sev === "amber" ? "sy-badge-amber" : "sy-badge-green";
+  const badgeClasse =
+    sev === "red"
+      ? "sy-badge-red"
+      : sev === "amber"
+        ? "sy-badge-amber"
+        : "sy-badge-green";
   const etapaInfo = etapasPortal.find((e) => e.chave === pedido.coluna);
 
   return `
@@ -75,22 +84,26 @@ async function alternarPedido(pedido) {
 
   if (!painel.dataset.carregado) {
     const eventos = await apiEventosDoPedidoPublico(pedido.id);
-    const indiceAtual = etapasPortal.findIndex((e) => e.chave === pedido.coluna);
+    const indiceAtual = etapasPortal.findIndex(
+      (e) => e.chave === pedido.coluna,
+    );
 
-    const stepsHtml = etapasPortal.map((etapa, i) => {
-      const eventoDaEtapa = eventos.find((ev) => ev.etapa === etapa.chave);
-      let estado = "pendente";
-      if (i < indiceAtual) estado = "concluido";
-      if (i === indiceAtual) estado = "atual";
-      const icone = estado === "concluido" ? "✓" : i + 1;
-      return `
+    const stepsHtml = etapasPortal
+      .map((etapa, i) => {
+        const eventoDaEtapa = eventos.find((ev) => ev.etapa === etapa.chave);
+        let estado = "pendente";
+        if (i < indiceAtual) estado = "concluido";
+        if (i === indiceAtual) estado = "atual";
+        const icone = estado === "concluido" ? "✓" : i + 1;
+        return `
         <div class="tl-step ${estado}">
           <div class="tl-step-line"></div>
           <div class="tl-step-dot">${icone}</div>
           <div class="tl-step-nome">${etapa.nome}</div>
           <div class="tl-step-data">${eventoDaEtapa ? formatarDataCurta(eventoDaEtapa.dataHora) : ""}</div>
         </div>`;
-    }).join("");
+      })
+      .join("");
 
     painel.innerHTML = `<div class="tl-steps" style="margin-top:10px;">${stepsHtml}</div>`;
     painel.dataset.carregado = "1";

@@ -1,5 +1,9 @@
 async function iniciarMeuPerfil() {
-  const usuario = montarLayout({ itemAtivo: "meu-perfil", titulo: "Meu Perfil", subtitulo: "Seus dados de acesso" });
+  const usuario = montarLayout({
+    itemAtivo: "meu-perfil",
+    titulo: "Meu Perfil",
+    subtitulo: "Seus dados de acesso",
+  });
   if (!usuario) return;
 
   document.getElementById("page-content").innerHTML = `
@@ -33,7 +37,9 @@ async function iniciarMeuPerfil() {
     </div>
   `;
 
-  document.getElementById("btnSalvar").addEventListener("click", () => salvarPerfil(usuario));
+  document
+    .getElementById("btnSalvar")
+    .addEventListener("click", () => salvarPerfil(usuario));
 }
 
 async function salvarPerfil(usuario) {
@@ -84,7 +90,11 @@ async function salvarPerfil(usuario) {
   botao.textContent = "Salvando...";
 
   try {
-    const atualizado = await apiAtualizarItem("usuarios", usuario.id, dadosAtualizados);
+    const atualizado = await apiAtualizarItem(
+      "usuarios",
+      usuario.id,
+      dadosAtualizados,
+    );
 
     const atualizadoPublico = { ...atualizado };
     delete atualizadoPublico.senha;

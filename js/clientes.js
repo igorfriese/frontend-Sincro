@@ -2,7 +2,11 @@ let clientesCache = [];
 let editandoId = null;
 
 async function iniciarClientes() {
-  const usuario = montarLayout({ itemAtivo: "clientes", titulo: "Clientes", subtitulo: "Confecções atendidas pela facção" });
+  const usuario = montarLayout({
+    itemAtivo: "clientes",
+    titulo: "Clientes",
+    subtitulo: "Confecções atendidas pela facção",
+  });
   if (!usuario) return;
 
   document.getElementById("page-content").innerHTML = `
@@ -23,9 +27,9 @@ async function iniciarClientes() {
       <div class="sy-card cd-modal">
         <h2 class="sy-card-title" style="margin-bottom:14px;" id="modalTitulo">Novo cliente</h2>
         <input class="login-input" id="fNome" placeholder="Nome da confecção">
-        <input class="login-input" id="fDocumento" placeholder="CNPJ">
-        <input class="login-input" id="fTelefone" placeholder="Telefone">
-        <input class="login-input" id="fEmail" placeholder="E-mail" type="email">
+        <input class="login-input" id="fDocumento" placeholder="CNPJ" data-only-numbers>
+        <input class="login-input" id="fTelefone" placeholder="Telefone" data-only-numbers>
+        <input class="login-input" id="fEmail" placeholder="E-mail" type="email" data-no-numbers>
         <div class="cd-modal-botoes">
           <button class="kb-btn-new cancelar" id="btnCancelar">Cancelar</button>
           <button class="kb-btn-new" id="btnSalvar">Salvar</button>
@@ -34,7 +38,9 @@ async function iniciarClientes() {
     </div>
   `;
 
-  document.getElementById("btnNovo").addEventListener("click", () => abrirModal());
+  document
+    .getElementById("btnNovo")
+    .addEventListener("click", () => abrirModal());
   document.getElementById("btnCancelar").addEventListener("click", fecharModal);
   document.getElementById("btnSalvar").addEventListener("click", salvar);
   document.getElementById("fBusca").addEventListener("input", renderizarTabela);
@@ -56,13 +62,18 @@ async function carregar() {
 }
 
 function renderizarTabela() {
-  const termo = (document.getElementById("fBusca").value || "").trim().toLowerCase();
+  const termo = (document.getElementById("fBusca").value || "")
+    .trim()
+    .toLowerCase();
   const corpo = document.getElementById("corpoTabela");
   const vazio = document.getElementById("vazio");
   corpo.innerHTML = "";
 
-  const filtrados = clientesCache.filter((c) =>
-    !termo || c.nome.toLowerCase().includes(termo) || (c.codigo || "").toLowerCase().includes(termo)
+  const filtrados = clientesCache.filter(
+    (c) =>
+      !termo ||
+      c.nome.toLowerCase().includes(termo) ||
+      (c.codigo || "").toLowerCase().includes(termo),
   );
 
   if (filtrados.length === 0) {
@@ -90,23 +101,29 @@ function renderizarTabela() {
     corpo.appendChild(tr);
   });
 
-  corpo.querySelectorAll('[data-acao="editar"]').forEach((btn) =>
-    btn.addEventListener("click", () => abrirModal(btn.dataset.id))
-  );
-  corpo.querySelectorAll('[data-acao="excluir"]').forEach((btn) =>
-    btn.addEventListener("click", () => excluir(btn.dataset.id))
-  );
+  corpo
+    .querySelectorAll('[data-acao="editar"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () => abrirModal(btn.dataset.id)),
+    );
+  corpo
+    .querySelectorAll('[data-acao="excluir"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () => excluir(btn.dataset.id)),
+    );
   corpo.querySelectorAll('[data-acao="link"]').forEach((btn) =>
     btn.addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText(btn.dataset.link);
         const original = btn.textContent;
         btn.textContent = "Copiado!";
-        setTimeout(() => { btn.textContent = original; }, 1500);
+        setTimeout(() => {
+          btn.textContent = original;
+        }, 1500);
       } catch {
         prompt("Copia esse link manualmente:", btn.dataset.link);
       }
-    })
+    }),
   );
 }
 
@@ -114,7 +131,9 @@ function abrirModal(id = null) {
   editandoId = id;
   const cliente = id ? clientesCache.find((c) => c.id === id) : null;
 
-  document.getElementById("modalTitulo").textContent = id ? "Editar cliente" : "Novo cliente";
+  document.getElementById("modalTitulo").textContent = id
+    ? "Editar cliente"
+    : "Novo cliente";
   document.getElementById("fNome").value = cliente?.nome || "";
   document.getElementById("fDocumento").value = cliente?.documento || "";
   document.getElementById("fTelefone").value = cliente?.telefone || "";
@@ -133,7 +152,10 @@ async function salvar() {
     telefone: document.getElementById("fTelefone").value.trim(),
     email: document.getElementById("fEmail").value.trim(),
   };
-  if (!dados.nome) { alert("O nome é obrigatório."); return; }
+  if (!dados.nome) {
+    alert("O nome é obrigatório.");
+    return;
+  }
 
   const botao = document.getElementById("btnSalvar");
   botao.disabled = true;
@@ -157,7 +179,9 @@ async function excluir(id) {
   const pedidos = await apiListarTodosPedidos();
   const qtdPedidos = pedidos.filter((p) => p.cliente === cliente.nome).length;
   if (qtdPedidos > 0) {
-    alert(`Não é possível excluir "${cliente.nome}": existem ${qtdPedidos} pedido(s) associados a esse cliente.`);
+    alert(
+      `Não é possível excluir "${cliente.nome}": existem ${qtdPedidos} pedido(s) associados a esse cliente.`,
+    );
     return;
   }
 

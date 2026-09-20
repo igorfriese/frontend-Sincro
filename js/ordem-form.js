@@ -6,7 +6,11 @@ let produtoSelecionado = null;
 let usuarioAtualForm = null;
 
 async function iniciarFormOrdem() {
-  usuarioAtualForm = montarLayout({ itemAtivo: "ordens", titulo: "Ordem de Produção", subtitulo: "Cadastro de uma nova OP" });
+  usuarioAtualForm = montarLayout({
+    itemAtivo: "ordens",
+    titulo: "Ordem de Produção",
+    subtitulo: "Cadastro de uma nova OP",
+  });
   if (!usuarioAtualForm) return;
 
   const params = new URLSearchParams(window.location.search);
@@ -14,20 +18,30 @@ async function iniciarFormOrdem() {
 
   let pedidoAtual = null;
   try {
-    [clientesDisponiveis, produtosDisponiveis] = await Promise.all([apiListar("clientes"), apiListar("produtos")]);
-    if (usuarioAtualForm.perfil !== "Vendedor") usuariosDisponiveis = await apiListar("usuarios");
+    [clientesDisponiveis, produtosDisponiveis] = await Promise.all([
+      apiListar("clientes"),
+      apiListar("produtos"),
+    ]);
+    if (usuarioAtualForm.perfil !== "Vendedor")
+      usuariosDisponiveis = await apiListar("usuarios");
     if (idEdicao) pedidoAtual = await apiBuscarPedido(idEdicao);
   } catch (erro) {
-    document.getElementById("page-content").innerHTML = `<div class="sy-erro-banner">${erro.message}</div>`;
+    document.getElementById("page-content").innerHTML =
+      `<div class="sy-erro-banner">${erro.message}</div>`;
     return;
   }
 
-  clienteSelecionado = pedidoAtual ? clientesDisponiveis.find((c) => c.nome === pedidoAtual.cliente) || null : null;
-  produtoSelecionado = pedidoAtual ? produtosDisponiveis.find((p) => p.nome === pedidoAtual.modelo) || null : null;
+  clienteSelecionado = pedidoAtual
+    ? clientesDisponiveis.find((c) => c.nome === pedidoAtual.cliente) || null
+    : null;
+  produtoSelecionado = pedidoAtual
+    ? produtosDisponiveis.find((p) => p.nome === pedidoAtual.modelo) || null
+    : null;
 
-  const campoResponsavel = usuarioAtualForm.perfil === "Vendedor"
-    ? `<input class="login-input" value="${usuarioAtualForm.nome} (você)" disabled style="opacity:.7;">`
-    : `<select class="login-input" id="fResponsavel">
+  const campoResponsavel =
+    usuarioAtualForm.perfil === "Vendedor"
+      ? `<input class="login-input" value="${usuarioAtualForm.nome} (você)" disabled style="opacity:.7;">`
+      : `<select class="login-input" id="fResponsavel">
         <option value="">Selecione um responsável...</option>
         ${usuariosDisponiveis.map((u) => `<option value="${u.id}" ${pedidoAtual?.responsavelId === u.id ? "selected" : ""}>${u.nome} (${u.perfil})</option>`).join("")}
       </select>`;
@@ -73,43 +87,70 @@ async function iniciarFormOrdem() {
     inputId: "fClienteBusca",
     listaId: "fClienteLista",
     itens: clientesDisponiveis,
-    aoSelecionar: (item) => { clienteSelecionado = item; },
-    aoLimpar: () => { clienteSelecionado = null; },
+    aoSelecionar: (item) => {
+      clienteSelecionado = item;
+    },
+    aoLimpar: () => {
+      clienteSelecionado = null;
+    },
   });
 
   configurarAutocomplete({
     inputId: "fProdutoBusca",
     listaId: "fProdutoLista",
     itens: produtosDisponiveis,
-    aoSelecionar: (item) => { produtoSelecionado = item; },
-    aoLimpar: () => { produtoSelecionado = null; },
+    aoSelecionar: (item) => {
+      produtoSelecionado = item;
+    },
+    aoLimpar: () => {
+      produtoSelecionado = null;
+    },
   });
 
-  document.getElementById("btnSalvar").addEventListener("click", () => salvar(idEdicao));
+  document
+    .getElementById("btnSalvar")
+    .addEventListener("click", () => salvar(idEdicao));
 }
 
 // Componente de busca com filtro: digita, filtra por nome OU código,
 // mostra lista, clicar seleciona. Reaproveitado pra Cliente e Produto.
-function configurarAutocomplete({ inputId, listaId, itens, aoSelecionar, aoLimpar }) {
+function configurarAutocomplete({
+  inputId,
+  listaId,
+  itens,
+  aoSelecionar,
+  aoLimpar,
+}) {
   const input = document.getElementById(inputId);
   const lista = document.getElementById(listaId);
 
   function renderizarLista(termo) {
     const termoBusca = termo.trim().toLowerCase();
-    if (!termoBusca) { lista.style.display = "none"; return; }
+    if (!termoBusca) {
+      lista.style.display = "none";
+      return;
+    }
 
-    const filtrados = itens.filter((it) =>
-      it.nome.toLowerCase().includes(termoBusca) || (it.codigo || "").toLowerCase().includes(termoBusca)
-    ).slice(0, 8);
+    const filtrados = itens
+      .filter(
+        (it) =>
+          it.nome.toLowerCase().includes(termoBusca) ||
+          (it.codigo || "").toLowerCase().includes(termoBusca),
+      )
+      .slice(0, 8);
 
     if (filtrados.length === 0) {
       lista.innerHTML = `<div class="ac-vazio">Nenhum resultado encontrado.</div>`;
     } else {
-      lista.innerHTML = filtrados.map((it) => `
+      lista.innerHTML = filtrados
+        .map(
+          (it) => `
         <div class="ac-item" data-id="${it.id}">
           <span>${it.nome}</span>
           <span class="ac-item-codigo">${it.codigo || ""}</span>
-        </div>`).join("");
+        </div>`,
+        )
+        .join("");
 
       lista.querySelectorAll(".ac-item").forEach((el) => {
         el.addEventListener("mousedown", (ev) => {
@@ -129,26 +170,33 @@ function configurarAutocomplete({ inputId, listaId, itens, aoSelecionar, aoLimpa
     renderizarLista(input.value);
   });
   input.addEventListener("focus", () => renderizarLista(input.value));
-  input.addEventListener("blur", () => setTimeout(() => { lista.style.display = "none"; }, 100));
+  input.addEventListener("blur", () =>
+    setTimeout(() => {
+      lista.style.display = "none";
+    }, 100),
+  );
 }
 
 async function salvar(idEdicao) {
   const erroBox = document.getElementById("formErro");
 
   if (!clienteSelecionado) {
-    erroBox.textContent = "Seleciona um cliente da lista (digita e clica numa opção).";
+    erroBox.textContent =
+      "Seleciona um cliente da lista (digita e clica numa opção).";
     erroBox.style.display = "block";
     return;
   }
   if (!produtoSelecionado) {
-    erroBox.textContent = "Seleciona um produto da lista (digita e clica numa opção).";
+    erroBox.textContent =
+      "Seleciona um produto da lista (digita e clica numa opção).";
     erroBox.style.display = "block";
     return;
   }
 
-  const responsavelId = usuarioAtualForm.perfil === "Vendedor"
-    ? usuarioAtualForm.id
-    : document.getElementById("fResponsavel").value;
+  const responsavelId =
+    usuarioAtualForm.perfil === "Vendedor"
+      ? usuarioAtualForm.id
+      : document.getElementById("fResponsavel").value;
 
   if (!responsavelId) {
     erroBox.textContent = "Seleciona um responsável pela ordem.";
@@ -181,7 +229,11 @@ async function salvar(idEdicao) {
       await apiAtualizarPedido(idEdicao, dados);
     } else {
       const criado = await apiCriarPedido(dados);
-      await apiCriarEvento({ pedidoId: criado.id, etapa: criado.coluna, observacao: "Ordem de produção criada." });
+      await apiCriarEvento({
+        pedidoId: criado.id,
+        etapa: criado.coluna,
+        observacao: "Ordem de produção criada.",
+      });
     }
     window.location.href = "kanban.html";
   } catch (erro) {

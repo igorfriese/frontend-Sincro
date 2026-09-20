@@ -1,4 +1,15 @@
-const PALETA_CORES = ["#3C3489", "#5B4FC9", "#8577E0", "#B06A12", "#1D9E75", "#2C7A57", "#C53434", "#3865C9", "#B0658A", "#6B6580"];
+const PALETA_CORES = [
+  "#3C3489",
+  "#5B4FC9",
+  "#8577E0",
+  "#B06A12",
+  "#1D9E75",
+  "#2C7A57",
+  "#C53434",
+  "#3865C9",
+  "#B0658A",
+  "#6B6580",
+];
 
 let pedidosCache = [];
 let etapasCache = [];
@@ -7,7 +18,11 @@ let editandoEtapaId = null;
 let corSelecionada = PALETA_CORES[0];
 
 async function iniciarKanban() {
-  usuarioAtualKanban = montarLayout({ itemAtivo: "ordens", titulo: "Ordens de Produção", subtitulo: "Acompanhe cada lote pelo pipeline de produção" });
+  usuarioAtualKanban = montarLayout({
+    itemAtivo: "ordens",
+    titulo: "Ordens de Produção",
+    subtitulo: "Acompanhe cada lote pelo pipeline de produção",
+  });
   if (!usuarioAtualKanban) return;
 
   const ehAdmin = usuarioAtualKanban.perfil === "Administrador";
@@ -57,17 +72,39 @@ async function iniciarKanban() {
     </div>
   `;
 
-  document.getElementById("kbSearch").addEventListener("input", renderizarBoard);
-  document.getElementById("kbClienteFiltro").addEventListener("change", renderizarBoard);
-  document.getElementById("kbPrazoFiltro").addEventListener("change", renderizarBoard);
+  document
+    .getElementById("kbSearch")
+    .addEventListener("input", renderizarBoard);
+  document
+    .getElementById("kbClienteFiltro")
+    .addEventListener("change", renderizarBoard);
+  document
+    .getElementById("kbPrazoFiltro")
+    .addEventListener("change", renderizarBoard);
 
   if (ehAdmin) {
     montarOpcoesDeCor();
-    document.getElementById("kbConfigColunas").addEventListener("click", abrirModalColunas);
-    document.getElementById("btnFecharColunas").addEventListener("click", () => document.getElementById("modalColunasFundo").classList.remove("aberto"));
-    document.getElementById("btnNovaColuna").addEventListener("click", () => abrirModalEditarColuna());
-    document.getElementById("btnCancelarColuna").addEventListener("click", () => document.getElementById("modalEditarColunaFundo").classList.remove("aberto"));
-    document.getElementById("btnSalvarColuna").addEventListener("click", salvarColuna);
+    document
+      .getElementById("kbConfigColunas")
+      .addEventListener("click", abrirModalColunas);
+    document
+      .getElementById("btnFecharColunas")
+      .addEventListener("click", () =>
+        document.getElementById("modalColunasFundo").classList.remove("aberto"),
+      );
+    document
+      .getElementById("btnNovaColuna")
+      .addEventListener("click", () => abrirModalEditarColuna());
+    document
+      .getElementById("btnCancelarColuna")
+      .addEventListener("click", () =>
+        document
+          .getElementById("modalEditarColunaFundo")
+          .classList.remove("aberto"),
+      );
+    document
+      .getElementById("btnSalvarColuna")
+      .addEventListener("click", salvarColuna);
   }
 
   await carregarPedidos();
@@ -95,7 +132,8 @@ function popularFiltroClientes() {
   select.innerHTML = '<option value="">Todos os clientes</option>';
   [...new Set(pedidosCache.map((p) => p.cliente))].sort().forEach((c) => {
     const opt = document.createElement("option");
-    opt.value = c; opt.textContent = c;
+    opt.value = c;
+    opt.textContent = c;
     select.appendChild(opt);
   });
   select.value = atual;
@@ -108,7 +146,8 @@ function renderizarBoard() {
 
   const filtrados = pedidosCache.filter((p) => {
     if (cliente && p.cliente !== cliente) return false;
-    if (termo && !(p.cliente + " " + p.id).toLowerCase().includes(termo)) return false;
+    if (termo && !(p.cliente + " " + p.id).toLowerCase().includes(termo))
+      return false;
     if (prazoFiltro && severidadePrazo(p.prazo) !== prazoFiltro) return false;
     return true;
   });
@@ -127,18 +166,27 @@ function renderizarBoard() {
   const etapaFinalObj = etapasCache[etapasCache.length - 1];
   const etapaPenultimaObj = etapasCache[etapasCache.length - 2];
 
-  const qtdFinalizados = pedidosCache.filter((p) => p.coluna === etapaFinalObj?.chave).length;
+  const qtdFinalizados = pedidosCache.filter(
+    (p) => p.coluna === etapaFinalObj?.chave,
+  ).length;
   const avisoBox = document.getElementById("kbAvisoFinalizados");
-  avisoBox.innerHTML = qtdFinalizados > 0 ? `
+  avisoBox.innerHTML =
+    qtdFinalizados > 0
+      ? `
     <div class="sy-card" style="padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
       <span style="font-size:13px;color:var(--sy-ink-soft);">${qtdFinalizados} pedido(s) finalizado(s) — não aparecem mais no Kanban.</span>
       <a class="sy-card-link" href="historico.html">Ver no Histórico →</a>
-    </div>` : "";
+    </div>`
+      : "";
 
   etapasVisiveis.forEach((etapa) => {
     const doPedidos = filtrados
       .filter((p) => p.coluna === etapa.chave)
-      .sort((a, b) => (b.urgente ? 1 : 0) - (a.urgente ? 1 : 0) || diasParaPrazo(a.prazo) - diasParaPrazo(b.prazo));
+      .sort(
+        (a, b) =>
+          (b.urgente ? 1 : 0) - (a.urgente ? 1 : 0) ||
+          diasParaPrazo(a.prazo) - diasParaPrazo(b.prazo),
+      );
     const coluna = document.createElement("div");
     coluna.className = "kb-column";
     coluna.style.setProperty("--kb-accent", etapa.cor);
@@ -147,11 +195,17 @@ function renderizarBoard() {
       <div class="kb-column-body"></div>`;
     const corpo = coluna.querySelector(".kb-column-body");
 
-    if (doPedidos.length === 0) corpo.innerHTML = `<div class="kb-column-empty">Nenhuma OP nesta etapa</div>`;
+    if (doPedidos.length === 0)
+      corpo.innerHTML = `<div class="kb-column-empty">Nenhuma OP nesta etapa</div>`;
     else doPedidos.forEach((p) => corpo.appendChild(criarCard(p, etapa.cor)));
 
-    corpo.addEventListener("dragover", (ev) => { ev.preventDefault(); corpo.classList.add("kb-drop-target"); });
-    corpo.addEventListener("dragleave", () => corpo.classList.remove("kb-drop-target"));
+    corpo.addEventListener("dragover", (ev) => {
+      ev.preventDefault();
+      corpo.classList.add("kb-drop-target");
+    });
+    corpo.addEventListener("dragleave", () =>
+      corpo.classList.remove("kb-drop-target"),
+    );
     corpo.addEventListener("drop", async (ev) => {
       ev.preventDefault();
       corpo.classList.remove("kb-drop-target");
@@ -159,7 +213,11 @@ function renderizarBoard() {
       const pedido = pedidosCache.find((p) => p.id === id);
       if (!pedido || pedido.coluna === etapa.chave) return;
 
-      const validacao = validarTransicaoEtapa(etapasCache, pedido.coluna, etapa.chave);
+      const validacao = validarTransicaoEtapa(
+        etapasCache,
+        pedido.coluna,
+        etapa.chave,
+      );
       if (!validacao.permitido) {
         alert(`Movimento não permitido: ${validacao.motivo}`);
         return;
@@ -171,7 +229,11 @@ function renderizarBoard() {
 
       try {
         await apiAtualizarPedido(id, { coluna: etapa.chave });
-        await apiCriarEvento({ pedidoId: id, etapa: etapa.chave, observacao: "" });
+        await apiCriarEvento({
+          pedidoId: id,
+          etapa: etapa.chave,
+          observacao: "",
+        });
       } catch (erro) {
         pedido.coluna = colunaAnterior;
         renderizarBoard();
@@ -185,13 +247,19 @@ function renderizarBoard() {
 
 function criarCard(pedido, cor) {
   const sev = severidadePrazo(pedido.prazo);
-  const badgeClasse = sev === "red" ? "sy-badge-red" : sev === "amber" ? "sy-badge-amber" : "sy-badge-green";
+  const badgeClasse =
+    sev === "red"
+      ? "sy-badge-red"
+      : sev === "amber"
+        ? "sy-badge-amber"
+        : "sy-badge-green";
   const etapaUltima = etapasCache[etapasCache.length - 1];
   const etapaPenultima = etapasCache[etapasCache.length - 2];
   // Atalho de "marcar como finalizado" só aparece na penúltima etapa
   // (ex: "Entregue") — pra outra coluna, o pedido continua livre pra
   // ser arrastado pra qualquer lugar, só sem esse botão de atalho.
-  const podeFinalizar = !!etapaPenultima && pedido.coluna === etapaPenultima.chave;
+  const podeFinalizar =
+    !!etapaPenultima && pedido.coluna === etapaPenultima.chave;
 
   const card = document.createElement("div");
   card.className = "kb-card" + (pedido.urgente ? " kb-card-urgente" : "");
@@ -208,18 +276,33 @@ function criarCard(pedido, cor) {
     <div class="kb-card-foot"><span class="kb-card-qty">${pedido.qtd} un.</span><span class="kb-card-qty">${formatarDataCurta(pedido.prazo)}</span></div>
     ${podeFinalizar ? `<button class="cd-btn-icone" data-acao-finalizar="${pedido.id}" style="width:100%;margin-top:8px;">Marcar como "${etapaUltima.nome}" →</button>` : ""}`;
 
-  card.addEventListener("click", () => window.location.href = `timeline.html?id=${pedido.id}`);
-  card.addEventListener("dragstart", (ev) => { ev.dataTransfer.setData("text/plain", pedido.id); setTimeout(() => card.classList.add("kb-dragging"), 0); });
+  card.addEventListener(
+    "click",
+    () => (window.location.href = `timeline.html?id=${pedido.id}`),
+  );
+  card.addEventListener("dragstart", (ev) => {
+    ev.dataTransfer.setData("text/plain", pedido.id);
+    setTimeout(() => card.classList.add("kb-dragging"), 0);
+  });
   card.addEventListener("dragend", () => card.classList.remove("kb-dragging"));
 
   if (podeFinalizar) {
     const botaoFinalizar = card.querySelector("[data-acao-finalizar]");
     botaoFinalizar.addEventListener("click", async (ev) => {
       ev.stopPropagation();
-      if (!confirm(`Marcar o pedido #${pedido.id} como "${etapaUltima.nome}"? Ele sairá do Kanban e ficará só no Histórico.`)) return;
+      if (
+        !confirm(
+          `Marcar o pedido #${pedido.id} como "${etapaUltima.nome}"? Ele sairá do Kanban e ficará só no Histórico.`,
+        )
+      )
+        return;
       try {
         await apiAtualizarPedido(pedido.id, { coluna: etapaUltima.chave });
-        await apiCriarEvento({ pedidoId: pedido.id, etapa: etapaUltima.chave, observacao: "" });
+        await apiCriarEvento({
+          pedidoId: pedido.id,
+          etapa: etapaUltima.chave,
+          observacao: "",
+        });
         pedido.coluna = etapaUltima.chave;
         renderizarBoard();
       } catch (erro) {
@@ -245,7 +328,9 @@ function renderizarTabelaColunas() {
   corpo.innerHTML = "";
 
   etapasCache.forEach((etapa, i) => {
-    const qtdPedidos = pedidosCache.filter((p) => p.coluna === etapa.chave).length;
+    const qtdPedidos = pedidosCache.filter(
+      (p) => p.coluna === etapa.chave,
+    ).length;
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>
@@ -266,15 +351,36 @@ function renderizarTabelaColunas() {
     corpo.appendChild(tr);
   });
 
-  corpo.querySelectorAll('[data-acao="editar"]').forEach((btn) => btn.addEventListener("click", () => abrirModalEditarColuna(btn.dataset.id)));
-  corpo.querySelectorAll('[data-acao="excluir"]').forEach((btn) => btn.addEventListener("click", () => excluirColuna(btn.dataset.id)));
-  corpo.querySelectorAll('[data-acao="subir"]').forEach((btn) => btn.addEventListener("click", () => moverColuna(btn.dataset.id, -1)));
-  corpo.querySelectorAll('[data-acao="descer"]').forEach((btn) => btn.addEventListener("click", () => moverColuna(btn.dataset.id, 1)));
+  corpo
+    .querySelectorAll('[data-acao="editar"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () =>
+        abrirModalEditarColuna(btn.dataset.id),
+      ),
+    );
+  corpo
+    .querySelectorAll('[data-acao="excluir"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () => excluirColuna(btn.dataset.id)),
+    );
+  corpo
+    .querySelectorAll('[data-acao="subir"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () => moverColuna(btn.dataset.id, -1)),
+    );
+  corpo
+    .querySelectorAll('[data-acao="descer"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () => moverColuna(btn.dataset.id, 1)),
+    );
 }
 
 function montarOpcoesDeCor() {
   const container = document.getElementById("corOpcoes");
-  container.innerHTML = PALETA_CORES.map((cor) => `<div class="cl-cor-opcao" data-cor="${cor}" style="background:${cor};"></div>`).join("");
+  container.innerHTML = PALETA_CORES.map(
+    (cor) =>
+      `<div class="cl-cor-opcao" data-cor="${cor}" style="background:${cor};"></div>`,
+  ).join("");
   container.querySelectorAll(".cl-cor-opcao").forEach((el) => {
     el.addEventListener("click", () => {
       corSelecionada = el.dataset.cor;
@@ -293,17 +399,27 @@ function abrirModalEditarColuna(id = null) {
   editandoEtapaId = id;
   const etapa = id ? etapasCache.find((e) => e.id === id) : null;
 
-  document.getElementById("modalEditarColunaTitulo").textContent = id ? "Editar coluna" : "Nova coluna";
+  document.getElementById("modalEditarColunaTitulo").textContent = id
+    ? "Editar coluna"
+    : "Nova coluna";
   document.getElementById("fNomeColuna").value = etapa?.nome || "";
   document.getElementById("modalEditarColunaErro").style.display = "none";
-  corSelecionada = etapa?.cor || PALETA_CORES[etapasCache.length % PALETA_CORES.length];
+  corSelecionada =
+    etapa?.cor || PALETA_CORES[etapasCache.length % PALETA_CORES.length];
   atualizarSelecaoDeCor();
   document.getElementById("modalEditarColunaFundo").classList.add("aberto");
 }
 
 function gerarChaveUnica(nome) {
-  const base = nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "etapa";
-  let chave = base, sufixo = 2;
+  const base =
+    nome
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "") || "etapa";
+  let chave = base,
+    sufixo = 2;
   while (etapasCache.some((e) => e.chave === chave)) {
     chave = `${base}-${sufixo}`;
     sufixo++;
@@ -327,12 +443,25 @@ async function salvarColuna() {
 
   try {
     if (editandoEtapaId) {
-      await apiAtualizarItem("etapas", editandoEtapaId, { nome, cor: corSelecionada });
+      await apiAtualizarItem("etapas", editandoEtapaId, {
+        nome,
+        cor: corSelecionada,
+      });
     } else {
-      const maiorOrdem = etapasCache.reduce((max, e) => Math.max(max, e.ordem), 0);
-      await apiCriarItem("etapas", { nome, cor: corSelecionada, chave: gerarChaveUnica(nome), ordem: maiorOrdem + 1 });
+      const maiorOrdem = etapasCache.reduce(
+        (max, e) => Math.max(max, e.ordem),
+        0,
+      );
+      await apiCriarItem("etapas", {
+        nome,
+        cor: corSelecionada,
+        chave: gerarChaveUnica(nome),
+        ordem: maiorOrdem + 1,
+      });
     }
-    document.getElementById("modalEditarColunaFundo").classList.remove("aberto");
+    document
+      .getElementById("modalEditarColunaFundo")
+      .classList.remove("aberto");
     etapasCache = await carregarEtapas();
     renderizarTabelaColunas();
     renderizarBoard();
@@ -347,10 +476,14 @@ async function salvarColuna() {
 
 async function excluirColuna(id) {
   const etapa = etapasCache.find((e) => e.id === id);
-  const qtdPedidos = pedidosCache.filter((p) => p.coluna === etapa.chave).length;
+  const qtdPedidos = pedidosCache.filter(
+    (p) => p.coluna === etapa.chave,
+  ).length;
 
   if (qtdPedidos > 0) {
-    alert(`Não é possível excluir "${etapa.nome}": existem ${qtdPedidos} pedido(s) nessa coluna. Move os pedidos pra outra coluna antes de excluir.`);
+    alert(
+      `Não é possível excluir "${etapa.nome}": existem ${qtdPedidos} pedido(s) nessa coluna. Move os pedidos pra outra coluna antes de excluir.`,
+    );
     return;
   }
   if (!confirm(`Excluir a coluna "${etapa.nome}"?`)) return;

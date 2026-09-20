@@ -1,15 +1,21 @@
 async function iniciarAlertas() {
-  const usuario = montarLayout({ itemAtivo: "alertas", titulo: "Alertas", subtitulo: "Lotes atrasados ou com prazo apertado" });
+  const usuario = montarLayout({
+    itemAtivo: "alertas",
+    titulo: "Alertas",
+    subtitulo: "Lotes atrasados ou com prazo apertado",
+  });
   if (!usuario) return;
 
-  document.getElementById("page-content").innerHTML = `<div class="sy-card" style="padding:20px;">Carregando...</div>`;
+  document.getElementById("page-content").innerHTML =
+    `<div class="sy-card" style="padding:20px;">Carregando...</div>`;
 
   let pedidos, etapas;
   try {
     pedidos = await apiListarPedidos();
     etapas = await carregarEtapas();
   } catch (erro) {
-    document.getElementById("page-content").innerHTML = `<div class="sy-erro-banner">${erro.message}</div>`;
+    document.getElementById("page-content").innerHTML =
+      `<div class="sy-erro-banner">${erro.message}</div>`;
     return;
   }
 
@@ -20,7 +26,11 @@ async function iniciarAlertas() {
   const atrasados = ativos.filter((p) => severidadePrazo(p.prazo) === "red");
   const apertados = ativos.filter((p) => severidadePrazo(p.prazo) === "amber");
   const semMovimentacao = ativos.filter((p) => diasParaPrazo(p.prazo) < -3);
-  const todosOrdenados = [...atrasados, ...apertados].sort((a, b) => (b.urgente ? 1 : 0) - (a.urgente ? 1 : 0) || diasParaPrazo(a.prazo) - diasParaPrazo(b.prazo));
+  const todosOrdenados = [...atrasados, ...apertados].sort(
+    (a, b) =>
+      (b.urgente ? 1 : 0) - (a.urgente ? 1 : 0) ||
+      diasParaPrazo(a.prazo) - diasParaPrazo(b.prazo),
+  );
 
   document.getElementById("page-content").innerHTML = `
     <div class="al-resumo">
@@ -35,16 +45,21 @@ async function iniciarAlertas() {
   function renderizarLista() {
     const termo = document.getElementById("alBusca").value.trim().toLowerCase();
     const filtrados = termo
-      ? todosOrdenados.filter((p) => (p.cliente + " " + p.id).toLowerCase().includes(termo))
+      ? todosOrdenados.filter((p) =>
+          (p.cliente + " " + p.id).toLowerCase().includes(termo),
+        )
       : todosOrdenados;
 
-    document.getElementById("alLista").innerHTML = filtrados.length ? filtrados.map((p) => {
-      const sev = severidadePrazo(p.prazo);
-      const icone = sev === "red" ? "⛔" : "⏰";
-      const bg = sev === "red" ? "var(--sy-red-tint)" : "var(--sy-amber-tint)";
-      const cor = sev === "red" ? "var(--sy-red)" : "var(--sy-amber)";
-      const titulo = sev === "red" ? "Ordem atrasada" : "Prazo apertado";
-      return `
+    document.getElementById("alLista").innerHTML = filtrados.length
+      ? filtrados
+          .map((p) => {
+            const sev = severidadePrazo(p.prazo);
+            const icone = sev === "red" ? "⛔" : "⏰";
+            const bg =
+              sev === "red" ? "var(--sy-red-tint)" : "var(--sy-amber-tint)";
+            const cor = sev === "red" ? "var(--sy-red)" : "var(--sy-amber)";
+            const titulo = sev === "red" ? "Ordem atrasada" : "Prazo apertado";
+            return `
         <div class="al-item" onclick="window.location.href='timeline.html?id=${p.id}'">
           <div class="al-item-icone" style="background:${bg};color:${cor};">${icone}</div>
           <div class="al-item-info">
@@ -52,7 +67,9 @@ async function iniciarAlertas() {
             <div class="al-item-sub">${p.modelo} • ${textoPrazo(p.prazo)} • prazo: ${formatarDataCurta(p.prazo)}</div>
           </div>
         </div>`;
-    }).join("") : `<div class="al-vazio">${termo ? "Nenhum alerta encontrado pra essa busca." : "Nenhum alerta no momento"}</div>`;
+          })
+          .join("")
+      : `<div class="al-vazio">${termo ? "Nenhum alerta encontrado pra essa busca." : "Nenhum alerta no momento"}</div>`;
   }
 
   document.getElementById("alBusca").addEventListener("input", renderizarLista);

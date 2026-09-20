@@ -26,7 +26,9 @@ function limparSessao() {
 // ---------- Autenticação ----------
 async function apiLogin(email, senha) {
   const db = carregarBanco();
-  const usuario = db.usuarios.find((u) => u.email === email && u.senha === senha);
+  const usuario = db.usuarios.find(
+    (u) => u.email === email && u.senha === senha,
+  );
   if (!usuario) throw new Error("Credenciais inválidas");
 
   const token = `local-${usuario.id}-${Date.now()}`;
@@ -95,7 +97,9 @@ async function apiExcluirPedido(id) {
 
 // ---------- Eventos (timeline) ----------
 async function apiListarEventosDoPedido(pedidoId) {
-  const eventos = carregarBanco().eventos.filter((e) => e.pedidoId === pedidoId);
+  const eventos = carregarBanco().eventos.filter(
+    (e) => e.pedidoId === pedidoId,
+  );
   return eventos.sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora));
 }
 async function apiCriarEvento(evento) {
@@ -123,7 +127,8 @@ async function apiCriarItem(colecao, dados) {
 
   if (colecao === "clientes") {
     novo.codigo = novo.codigo || proximoCodigo(db.clientes, "CLI");
-    novo.tokenAcompanhamento = novo.tokenAcompanhamento || gerarTokenAleatorio("cli");
+    novo.tokenAcompanhamento =
+      novo.tokenAcompanhamento || gerarTokenAleatorio("cli");
   }
   if (colecao === "produtos") {
     novo.codigo = novo.codigo || proximoCodigo(db.produtos, "PRD");
@@ -152,7 +157,9 @@ async function apiExcluirItem(colecao, id) {
 // O link é por CLIENTE, não por pedido: mostra todos os pedidos dele.
 async function apiAcompanharCliente(tokenPublico) {
   const db = carregarBanco();
-  const cliente = (db.clientes || []).find((c) => c.tokenAcompanhamento === tokenPublico);
+  const cliente = (db.clientes || []).find(
+    (c) => c.tokenAcompanhamento === tokenPublico,
+  );
   if (!cliente) throw new Error("Link inválido ou cliente não encontrado");
 
   const pedidos = db.pedidos

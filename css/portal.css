@@ -8,8 +8,24 @@ body.portal-body {
   padding: 40px 20px;
 }
 .portal-header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
 }
-.portal-header-name { font-family: var(--sy-font-display); font-weight: 700; font-size: 18px; color: var(--sy-purple-900); }
-.portal-wrap { width: 100%; max-width: 720px; }
-.portal-caption { text-align: center; color: var(--sy-ink-soft); font-size: 13px; margin-bottom: 24px; }
+.portal-header-name {
+  font-family: var(--sy-font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--sy-purple-900);
+}
+.portal-wrap {
+  width: 100%;
+  max-width: 720px;
+}
+.portal-caption {
+  text-align: center;
+  color: var(--sy-ink-soft);
+  font-size: 13px;
+  margin-bottom: 24px;
+}

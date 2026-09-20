@@ -1,51 +1,80 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Entrar — Syncrow</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/login.css">
-</head>
-<body class="login-body">
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Acesse o sistema Sincro para acompanhar sua operação de produção."
+    />
+    <title>Entrar</title>
+    <link rel="icon" type="image/png" href="assets/Sincro.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/login.css" />
+  </head>
+  <body class="login-body">
+    <main class="login-card" aria-labelledby="login-title">
+      <a
+        class="login-brand"
+        href="index.html"
+        aria-label="Voltar para o site Sincro"
+      >
+        <img class="login-brand-mark" src="assets/Bola.png" alt="" />
+        <span class="login-brand-name">Sincro</span>
+      </a>
 
-  <div class="login-card">
-    <div class="login-brand">
-      <svg width="30" height="30" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="20" cy="20" r="19" fill="#5B4FC9" />
-        <path d="M11 24c2-6 5-11 11-11 4.5 0 7 2.6 8 5.4-1.6-.6-3-.6-4 .2 1.7.4 2.8 1.4 3.3 3-1.6-.9-3.1-1-4.4-.2.3 2-.5 3.6-2.1 4.6-2.6 1.6-6.6 1.5-9.6-.2Z" fill="#fff" />
-        <circle cx="24.5" cy="17.6" r="1.1" fill="#221C46" />
-      </svg>
-      <span class="login-brand-name">Syncrow</span>
-    </div>
+      <header class="login-heading">
+        <p class="login-kicker">Área restrita</p>
+        <h1 class="login-title" id="login-title">Bem-vindo de volta.</h1>
+        <p class="login-sub">Entre para acompanhar sua produção.</p>
+      </header>
 
-    <h1 class="login-title">Entrar</h1>
-    <p class="login-sub">Acompanhe a produção em tempo real.</p>
+      <div
+        class="login-erro"
+        id="loginErro"
+        role="alert"
+        aria-live="polite"
+      ></div>
 
-    <div class="login-erro" id="loginErro"></div>
+      <form id="formLogin">
+        <div class="login-field">
+          <label class="login-label" for="inputEmail">E-mail</label>
+          <input
+            class="login-input"
+            type="email"
+            id="inputEmail"
+            name="email"
+            placeholder="seu@email.com"
+            required
+            autocomplete="email"
+          />
+        </div>
+        <div class="login-field">
+          <label class="login-label" for="inputSenha">Senha</label>
+          <input
+            class="login-input"
+            type="password"
+            id="inputSenha"
+            name="senha"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <button class="login-btn" type="submit" id="btnEntrar">Entrar</button>
+      </form>
+    </main>
 
-    <form id="formLogin">
-      <label class="login-label" for="inputEmail">E-mail</label>
-      <input class="login-input" type="email" id="inputEmail" placeholder="seu@email.com" required>
-
-      <label class="login-label" for="inputSenha">Senha</label>
-      <input class="login-input" type="password" id="inputSenha" placeholder="••••••••" required>
-
-      <button class="login-btn" type="submit" id="btnEntrar">Entrar</button>
-    </form>
-
-    <div class="login-dica">
-      <b>Contas de teste</b> (senha: 123456)<br>
-      ana@syncrow.com — Administrador<br>
-      carlos@syncrow.com — Gestor<br>
-      julia@syncrow.com — Vendedor
-    </div>
-  </div>
-
-  <script src="js/local-db.js"></script>
-  <script src="js/api-client.js"></script>
-  <script src="js/login.js"></script>
-</body>
+    <script src="js/local-db.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/login.js"></script>
+    <script src="js/scroll-animations.js"></script>
+    <script src="js/validacao-campos.js"></script>
+  </body>
 </html>

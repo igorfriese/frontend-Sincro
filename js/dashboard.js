@@ -1,14 +1,23 @@
 const META_PRODUCAO_MES = 2500;
 
 async function iniciarDashboard() {
-  const usuario = montarLayout({ itemAtivo: "dashboard", titulo: "Dashboard", subtitulo: "Visão geral da operação" });
+  const usuario = montarLayout({
+    itemAtivo: "dashboard",
+    titulo: "Dashboard",
+    subtitulo: "Visão geral da operação",
+  });
   if (!usuario) return;
 
-  document.getElementById("page-content").innerHTML = `<div class="sy-card" style="padding:20px;">Carregando...</div>`;
+  document.getElementById("page-content").innerHTML =
+    `<div class="sy-card" style="padding:20px;">Carregando...</div>`;
 
   let pedidos, etapas, produtos;
   try {
-    [pedidos, etapas, produtos] = await Promise.all([apiListarPedidos(), carregarEtapas(), apiListar("produtos")]);
+    [pedidos, etapas, produtos] = await Promise.all([
+      apiListarPedidos(),
+      carregarEtapas(),
+      apiListar("produtos"),
+    ]);
   } catch (erro) {
     document.getElementById("page-content").innerHTML =
       `<div class="sy-erro-banner">Não foi possível carregar os dados: ${erro.message}</div>`;
@@ -18,13 +27,21 @@ async function iniciarDashboard() {
   const chaveUltimaEtapa = etapas[etapas.length - 1]?.chave;
 
   const producaoDoMes = pedidos.reduce((s, p) => s + Number(p.qtd), 0);
-  const percentualMeta = Math.min(100, Math.round((producaoDoMes / META_PRODUCAO_MES) * 100));
-  const ordensEmAndamento = pedidos.filter((p) => p.coluna !== chaveUltimaEtapa).length;
-  const lotesEmAtraso = pedidos.filter((p) => severidadePrazo(p.prazo) === "red").length;
+  const percentualMeta = Math.min(
+    100,
+    Math.round((producaoDoMes / META_PRODUCAO_MES) * 100),
+  );
+  const ordensEmAndamento = pedidos.filter(
+    (p) => p.coluna !== chaveUltimaEtapa,
+  ).length;
+  const lotesEmAtraso = pedidos.filter(
+    (p) => severidadePrazo(p.prazo) === "red",
+  ).length;
   const faturamentoDoMes = calcularFaturamento(pedidos, produtos);
   const mostrarFaturamento = usuario.perfil === "Administrador";
 
-  const raio = 60, circunferencia = 2 * Math.PI * raio;
+  const raio = 60,
+    circunferencia = 2 * Math.PI * raio;
   const progresso = circunferencia * (percentualMeta / 100);
 
   const totalPipeline = pedidos.length;
@@ -32,31 +49,51 @@ async function iniciarDashboard() {
   // largura ainda ocupa espaço (min-width automático de flex item por
   // causa do texto "0" e da borda), o que quebrava o visual.
   const segmentosHtml = etapas
-    .map((etapa) => ({ etapa, qtd: pedidos.filter((p) => p.coluna === etapa.chave).length }))
+    .map((etapa) => ({
+      etapa,
+      qtd: pedidos.filter((p) => p.coluna === etapa.chave).length,
+    }))
     .filter(({ qtd }) => qtd > 0)
     .map(({ etapa, qtd }) => {
       const largura = (qtd * 100) / totalPipeline;
       return `<div class="db-thread-seg" style="width:${largura}%;background:${etapa.cor};">${qtd}</div>`;
-    }).join("");
-  const legendaHtml = etapas.map((e) => `
+    })
+    .join("");
+  const legendaHtml = etapas
+    .map(
+      (e) => `
     <div class="db-pipeline-legend-item"><div class="db-pipeline-swatch" style="background:${e.cor};"></div>${e.nome}</div>
-  `).join("");
+  `,
+    )
+    .join("");
 
-  const emAtencao = pedidos.filter((p) => p.coluna !== chaveUltimaEtapa && severidadePrazo(p.prazo) !== "ok")
-    .sort((a, b) => (b.urgente ? 1 : 0) - (a.urgente ? 1 : 0) || diasParaPrazo(a.prazo) - diasParaPrazo(b.prazo)).slice(0, 6);
+  const emAtencao = pedidos
+    .filter(
+      (p) => p.coluna !== chaveUltimaEtapa && severidadePrazo(p.prazo) !== "ok",
+    )
+    .sort(
+      (a, b) =>
+        (b.urgente ? 1 : 0) - (a.urgente ? 1 : 0) ||
+        diasParaPrazo(a.prazo) - diasParaPrazo(b.prazo),
+    )
+    .slice(0, 6);
 
-  const linhasAtencaoHtml = emAtencao.length ? emAtencao.map((p) => {
-    const sev = severidadePrazo(p.prazo);
-    const badgeClasse = sev === "red" ? "sy-badge-red" : "sy-badge-amber";
-    const badgeTexto = sev === "red" ? "Atrasado" : "Atenção";
-    return `
+  const linhasAtencaoHtml = emAtencao.length
+    ? emAtencao
+        .map((p) => {
+          const sev = severidadePrazo(p.prazo);
+          const badgeClasse = sev === "red" ? "sy-badge-red" : "sy-badge-amber";
+          const badgeTexto = sev === "red" ? "Atrasado" : "Atenção";
+          return `
       <div class="db-attention-row">
         <span class="db-attention-op">#${p.id}</span>
         <span class="db-attention-client">${p.urgente ? badgeUrgente() + " " : ""}${p.cliente}</span>
         <span class="db-attention-motivo">${p.modelo} — ${textoPrazo(p.prazo)}</span>
         <span class="sy-badge ${badgeClasse}"><span class="sy-dot"></span>${badgeTexto}</span>
       </div>`;
-  }).join("") : `<div class="db-attention-row"><span class="db-attention-motivo">Nenhum lote precisa de atenção agora</span></div>`;
+        })
+        .join("")
+    : `<div class="db-attention-row"><span class="db-attention-motivo">Nenhum lote precisa de atenção agora</span></div>`;
 
   document.getElementById("page-content").innerHTML = `
     <div class="db-metrics">
@@ -75,12 +112,16 @@ async function iniciarDashboard() {
         <div class="db-metric-value">${lotesEmAtraso}</div>
         <div class="db-metric-foot"><span class="sy-badge sy-badge-red"><span class="sy-dot"></span>precisam de atenção</span></div>
       </div>
-      ${mostrarFaturamento ? `
+      ${
+        mostrarFaturamento
+          ? `
       <div class="sy-card db-metric">
         <div class="db-metric-label">Faturamento do mês</div>
         <div class="db-metric-value mono">R$ ${faturamentoDoMes.toLocaleString("pt-BR")}</div>
         <div class="db-metric-foot"><span class="sy-badge sy-badge-green"><span class="sy-dot"></span>dado restrito ao ADM</span></div>
-      </div>` : ""}
+      </div>`
+          : ""
+      }
     </div>
     <div class="db-row-2">
       <div class="sy-card db-donut-wrap">

@@ -8,13 +8,22 @@ let usuarioAtual = null;
 let etapasCache = [];
 
 async function iniciarAssistente() {
-  usuarioAtual = montarLayout({ itemAtivo: "assistente", titulo: "Assistente (IA)", subtitulo: "Pergunte sobre prazos, produção e pedidos" });
+  usuarioAtual = montarLayout({
+    itemAtivo: "assistente",
+    titulo: "Assistente (IA)",
+    subtitulo: "Pergunte sobre prazos, produção e pedidos",
+  });
   if (!usuarioAtual) return;
 
   etapasCache = await carregarEtapas();
 
-  const sugestoes = ["Quais pedidos estão atrasados?", "Qual o prazo do pedido #3?", "Quantos pedidos estão em andamento?"];
-  if (usuarioAtual.perfil === "Administrador") sugestoes.push("Qual o faturamento do mês?");
+  const sugestoes = [
+    "Quais pedidos estão atrasados?",
+    "Qual o prazo do pedido #3?",
+    "Quantos pedidos estão em andamento?",
+  ];
+  if (usuarioAtual.perfil === "Administrador")
+    sugestoes.push("Qual o faturamento do mês?");
 
   document.getElementById("page-content").innerHTML = `
     <div class="sy-card as-wrap">
@@ -30,9 +39,14 @@ async function iniciarAssistente() {
     </div>
   `;
 
-  adicionarMensagem("bot", `Oi, ${usuarioAtual.nome.split(" ")[0]}! Pode perguntar sobre prazos e pedidos.`);
+  adicionarMensagem(
+    "bot",
+    `Oi, ${usuarioAtual.nome.split(" ")[0]}! Pode perguntar sobre prazos e pedidos.`,
+  );
 
-  document.getElementById("asEnviar").addEventListener("click", enviarMensagemAtual);
+  document
+    .getElementById("asEnviar")
+    .addEventListener("click", enviarMensagemAtual);
   document.getElementById("asInput").addEventListener("keydown", (ev) => {
     if (ev.key === "Enter") enviarMensagemAtual();
   });
@@ -68,7 +82,11 @@ async function responder(pergunta) {
   try {
     pedidos = await apiListarPedidos();
   } catch (erro) {
-    adicionarMensagem("bot", `Não consegui buscar os dados agora: ${erro.message}`, true);
+    adicionarMensagem(
+      "bot",
+      `Não consegui buscar os dados agora: ${erro.message}`,
+      true,
+    );
     return;
   }
 
@@ -79,8 +97,13 @@ async function responder(pergunta) {
     if (atrasados.length === 0) {
       adicionarMensagem("bot", "Nenhum pedido atrasado no momento. 🎉");
     } else {
-      const lista = atrasados.map((p) => `#${p.id} (${p.cliente}, ${textoPrazo(p.prazo)})`).join(", ");
-      adicionarMensagem("bot", `${atrasados.length} pedido(s) atrasado(s): ${lista}.`);
+      const lista = atrasados
+        .map((p) => `#${p.id} (${p.cliente}, ${textoPrazo(p.prazo)})`)
+        .join(", ");
+      adicionarMensagem(
+        "bot",
+        `${atrasados.length} pedido(s) atrasado(s): ${lista}.`,
+      );
     }
     return;
   }
@@ -88,7 +111,10 @@ async function responder(pergunta) {
   if (pergunta.includes("andamento")) {
     const chaveUltimaEtapa = etapaFinal(etapasCache)?.chave;
     const emAndamento = pedidos.filter((p) => p.coluna !== chaveUltimaEtapa);
-    adicionarMensagem("bot", `Você tem ${emAndamento.length} pedido(s) em andamento no momento.`);
+    adicionarMensagem(
+      "bot",
+      `Você tem ${emAndamento.length} pedido(s) em andamento no momento.`,
+    );
     return;
   }
 
@@ -97,25 +123,42 @@ async function responder(pergunta) {
     const id = matchPedido[1];
     const pedido = pedidos.find((p) => p.id === id);
     if (!pedido) {
-      adicionarMensagem("bot", `Não encontrei o pedido #${id} entre os que você tem acesso.`, true);
+      adicionarMensagem(
+        "bot",
+        `Não encontrei o pedido #${id} entre os que você tem acesso.`,
+        true,
+      );
     } else {
-      adicionarMensagem("bot", `O pedido #${pedido.id} (${pedido.cliente}) tem prazo pra ${formatarDataCurta(pedido.prazo)} — ${textoPrazo(pedido.prazo)}.`);
+      adicionarMensagem(
+        "bot",
+        `O pedido #${pedido.id} (${pedido.cliente}) tem prazo pra ${formatarDataCurta(pedido.prazo)} — ${textoPrazo(pedido.prazo)}.`,
+      );
     }
     return;
   }
 
   if (pergunta.includes("fatur")) {
     if (usuarioAtual.perfil !== "Administrador") {
-      adicionarMensagem("bot", "Essa informação é restrita ao perfil Administrador — não posso mostrar o faturamento pro seu perfil.", true);
+      adicionarMensagem(
+        "bot",
+        "Essa informação é restrita ao perfil Administrador — não posso mostrar o faturamento pro seu perfil.",
+        true,
+      );
     } else {
       const produtos = await apiListar("produtos");
       const total = calcularFaturamento(pedidos, produtos);
-      adicionarMensagem("bot", `O faturamento estimado do mês é R$ ${total.toLocaleString("pt-BR")}.`);
+      adicionarMensagem(
+        "bot",
+        `O faturamento estimado do mês é R$ ${total.toLocaleString("pt-BR")}.`,
+      );
     }
     return;
   }
 
-  adicionarMensagem("bot", "Ainda não sei responder isso na demonstração — tenta perguntar sobre pedidos atrasados, prazos ou pedidos em andamento.");
+  adicionarMensagem(
+    "bot",
+    "Ainda não sei responder isso na demonstração — tenta perguntar sobre pedidos atrasados, prazos ou pedidos em andamento.",
+  );
 }
 
 iniciarAssistente();

@@ -1,207 +1,298 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Syncrow — Visibilidade operacional para facções têxteis</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/tokens.css">
-  <link rel="stylesheet" href="css/landing.css">
-</head>
-<body class="landing-body">
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Sincro centraliza a produção de facções têxteis em uma experiência simples, visual e em tempo real."
+    />
+    <title>Sincro — Produção visível do corte até a entrega</title>
+    <link rel="icon" type="image/png" href="assets/Sincro.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/landing.css" />
+  </head>
+  <body class="landing-body">
+    <a class="ld-skip-link" href="#conteudo">Pular para o conteúdo</a>
 
-  <header class="ld-header" id="ldHeader">
-    <div class="ld-brand">
-      <svg width="30" height="30" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="20" cy="20" r="19" fill="#5B4FC9" />
-        <path d="M11 24c2-6 5-11 11-11 4.5 0 7 2.6 8 5.4-1.6-.6-3-.6-4 .2 1.7.4 2.8 1.4 3.3 3-1.6-.9-3.1-1-4.4-.2.3 2-.5 3.6-2.1 4.6-2.6 1.6-6.6 1.5-9.6-.2Z" fill="#fff" />
-        <circle cx="24.5" cy="17.6" r="1.1" fill="#221C46" />
-      </svg>
-      <span class="ld-brand-name">Syncrow</span>
-    </div>
-    <button class="ld-btn-entrar" onclick="window.location.href='login.html'">Entrar</button>
-  </header>
+    <header class="ld-header" id="ldHeader">
+      <a class="ld-brand" href="#topo" aria-label="Sincro — início">
+        <img class="ld-brand-mark" src="assets/Bola2.png" alt="" />
+        <span class="ld-brand-name">Sincro</span>
+      </a>
 
-  <section class="ld-hero">
-    <div class="ld-eyebrow">Visibilidade operacional para facções têxteis</div>
-    <h1 class="ld-h1">Sua produção, visível<br>do corte <span>até a entrega.</span></h1>
-    <p class="ld-sub">
-      O Syncrow centraliza os pedidos da sua facção em um só lugar, em tempo real —
-      chega de caderno, planilha e WhatsApp espalhados pra saber onde está cada lote.
-    </p>
-    <div class="ld-hero-ctas">
-      <button class="ld-btn-entrar" onclick="window.location.href='login.html'">Entrar no sistema</button>
-      <a class="ld-link-secundario" href="#como-funciona">Ver como funciona ↓</a>
-    </div>
+      <nav class="ld-nav" aria-label="Navegação principal">
+        <a href="#recursos">Recursos</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#planos">Planos</a>
+      </nav>
 
-    <div class="ld-thread">
-      <div class="ld-thread-seg" style="background:linear-gradient(90deg,#3C3489,#4A3FA0,#3C3489);"></div>
-      <div class="ld-thread-seg" style="background:linear-gradient(90deg,#5B4FC9,#6B5FD9,#5B4FC9);"></div>
-      <div class="ld-thread-seg" style="background:linear-gradient(90deg,#8577E0,#9587F0,#8577E0);"></div>
-      <div class="ld-thread-seg" style="background:linear-gradient(90deg,#B06A12,#C07A22,#B06A12);"></div>
-      <div class="ld-thread-seg" style="background:linear-gradient(90deg,#2C7A9E,#3C8AAE,#2C7A9E);"></div>
-      <div class="ld-thread-seg" style="background:linear-gradient(90deg,#1D9E75,#2DAE85,#1D9E75);"></div>
-    </div>
-    <div class="ld-thread-legend">
-      <span>Corte</span><span>Costura</span><span>Acabamento</span><span>Revisão</span><span>Entregue</span><span>Finalizado</span>
-    </div>
-  </section>
+      <a class="ld-btn-entrar" href="login.html">Entrar</a>
+    </header>
 
-  <section class="ld-problema">
-    <div class="ld-problema-inner">
-      <h2>O problema não é falta de trabalho. É falta de visibilidade.</h2>
-      <p>
-        A facção recebe ordens de várias confecções ao mesmo tempo, cada uma com prazo e
-        modelo diferente. Sem um lugar único pra acompanhar isso, o dono só descobre um
-        atraso quando o cliente liga reclamando — e a confecção contratante não tem
-        nenhuma visibilidade do próprio pedido até a peça chegar.
-      </p>
-    </div>
-  </section>
-
-  <section class="ld-section" id="recursos">
-    <div class="ld-section-head">
-      <div class="ld-eyebrow">O que o Syncrow faz</div>
-      <h2>Menos tempo caçando informação, mais tempo produzindo</h2>
-      <p>Quatro peças que resolvem o problema de ponta a ponta — do chão de fábrica até o cliente final.</p>
-    </div>
-
-    <div class="ld-features">
-      <div class="ld-feature">
-        <div class="ld-feature-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v16M15 4v16"/></svg>
+    <main id="conteudo">
+      <section class="ld-hero" id="topo" aria-labelledby="hero-title">
+        <div class="ld-hero-glow" aria-hidden="true"></div>
+        <div class="ld-eyebrow" data-reveal>
+          Visibilidade operacional para facções têxteis
         </div>
-        <h3>Kanban de produção</h3>
-        <p>Cada lote passa por etapas configuráveis — corte, costura, acabamento — com regras de fluxo que impedem pular ou desfazer etapas por engano.</p>
-      </div>
-      <div class="ld-feature">
-        <div class="ld-feature-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <h3>Alertas automáticos</h3>
-        <p>O sistema avisa sozinho quando um lote está parado, atrasado ou com prazo apertado — antes que o cliente precise ligar perguntando.</p>
-      </div>
-      <div class="ld-feature">
-        <div class="ld-feature-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
-        </div>
-        <h3>Portal do cliente</h3>
-        <p>Cada confecção contratante acompanha os próprios pedidos por um link direto, sem precisar criar conta nem ligar pra saber o status.</p>
-      </div>
-      <div class="ld-feature">
-        <div class="ld-feature-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 3l7 4v10l-7 4-7-4V7z"/><path d="M6 7l7 4 7-4M13 11v10"/></svg>
-        </div>
-        <h3>Assistente com permissão</h3>
-        <p>Pergunte sobre prazos e produção em linguagem natural — a resposta respeita o que cada perfil pode ver, sem exceção.</p>
-      </div>
-    </div>
-  </section>
+        <h1 class="ld-h1" id="hero-title" data-reveal>
+          Sua produção, visível<br />do corte <span>até a entrega.</span>
+        </h1>
+        <p class="ld-sub" data-reveal>
+          O Sincro centraliza os pedidos da sua facção em um só lugar, em tempo
+          real — chega de caderno, planilha e WhatsApp espalhados pra saber onde
+          está cada lote.
+        </p>
 
-  <section class="ld-section" id="como-funciona">
-    <div class="ld-section-head">
-      <div class="ld-eyebrow">Como funciona</div>
-      <h2>Três passos, do pedido à entrega</h2>
-    </div>
-    <div class="ld-passos">
-      <div class="ld-passo">
-        <div class="ld-passo-numero">1</div>
-        <h3>Cadastre a ordem</h3>
-        <p>Cliente, modelo, quantidade e prazo — em menos de um minuto, com busca inteligente de cadastros já existentes.</p>
-      </div>
-      <div class="ld-passo">
-        <div class="ld-passo-numero">2</div>
-        <h3>Acompanhe em tempo real</h3>
-        <p>Arraste o lote pelas etapas do Kanban. Cada movimento vira um evento na timeline do pedido, automaticamente.</p>
-      </div>
-      <div class="ld-passo">
-        <div class="ld-passo-numero">3</div>
-        <h3>Entregue com confiança</h3>
-        <p>O cliente já acompanhou tudo pelo portal dele. Sem ligação de última hora perguntando "cadê meu pedido?".</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="ld-planos-wrap">
-    <div class="ld-section" id="planos">
-      <div class="ld-section-head">
-        <div class="ld-eyebrow">Sobre contratar</div>
-        <h2>Feito pra facção pequena, não pra ERP de grande indústria</h2>
-        <p>Sem contrato de fidelidade, sem taxa de implantação. Um valor fixo por usuário, todo mês.</p>
-      </div>
-
-      <div class="ld-planos">
-        <div class="ld-plano">
-          <div class="ld-plano-nome">Essencial</div>
-          <div class="ld-plano-preco">R$ 49<small>/usuário/mês</small></div>
-          <div class="ld-plano-desc">Pra facção com um time pequeno começando a organizar a produção.</div>
-          <ul>
-            <li>✓ Kanban de produção</li>
-            <li>✓ Timeline por pedido</li>
-            <li>✓ Alertas automáticos</li>
-            <li>✓ Portal do cliente</li>
-          </ul>
-          <button class="ld-plano-btn" onclick="window.location.href='login.html'">Começar agora</button>
+        <div class="ld-hero-ctas" data-reveal>
+          <a class="ld-btn-entrar ld-btn-large" href="login.html"
+            >Entrar no sistema</a
+          >
+          <a class="ld-link-secundario" href="#como-funciona"
+            >Ver como funciona <span aria-hidden="true">↓</span></a
+          >
         </div>
 
-        <div class="ld-plano destaque">
-          <div class="ld-plano-nome">Operação</div>
-          <div class="ld-plano-preco">R$ 89<small>/usuário/mês</small></div>
-          <div class="ld-plano-desc">Pra quem já tem mais de um cliente contratante e precisa de histórico.</div>
-          <ul>
-            <li>✓ Tudo do plano Essencial</li>
-            <li>✓ Assistente de IA</li>
-            <li>✓ Histórico completo</li>
-            <li>✓ Colunas do Kanban customizáveis</li>
-          </ul>
-          <button class="ld-plano-btn" onclick="window.location.href='login.html'">Começar agora</button>
+        <div class="ld-pipeline" aria-label="Fluxo de produção">
+          <div class="ld-thread" aria-hidden="true">
+            <span class="ld-thread-seg ld-thread-corte"></span>
+            <span class="ld-thread-seg ld-thread-costura"></span>
+            <span class="ld-thread-seg ld-thread-acabamento"></span>
+            <span class="ld-thread-seg ld-thread-revisao"></span>
+            <span class="ld-thread-seg ld-thread-entrega"></span>
+            <span class="ld-thread-seg ld-thread-finalizado"></span>
+          </div>
+          <div class="ld-thread-legend">
+            <span>Corte</span><span>Costura</span><span>Acabamento</span
+            ><span>Revisão</span><span>Entrega</span><span>Finalizado</span>
+          </div>
         </div>
+      </section>
 
-        <div class="ld-plano">
-          <div class="ld-plano-nome">Sob consulta</div>
-          <div class="ld-plano-preco" style="font-size:19px;">Fale com a gente</div>
-          <div class="ld-plano-desc">Pra redes de facções ou operações com necessidades específicas.</div>
-          <ul>
-            <li>✓ Tudo do plano Operação</li>
-            <li>✓ Múltiplas unidades</li>
-            <li>✓ Suporte prioritário</li>
-          </ul>
-          <a class="ld-plano-btn" style="display:block;box-sizing:border-box;text-decoration:none;" href="#contato">Ver contato</a>
+      <section class="ld-problema" aria-labelledby="problema-title">
+        <div class="ld-problema-inner" data-reveal>
+          <p class="ld-kicker">O cenário</p>
+          <h2 id="problema-title">
+            O problema não é falta de trabalho. É falta de visibilidade.
+          </h2>
+          <p>
+            A facção recebe ordens de várias confecções ao mesmo tempo, cada uma
+            com prazo e modelo diferente. Sem um lugar único pra acompanhar
+            isso, o dono só descobre um atraso quando o cliente liga reclamando.
+          </p>
         </div>
-      </div>
-    </div>
-  </section>
+      </section>
 
-  <section class="ld-section ld-contato" id="contato">
-    <div class="ld-section-head" style="margin-bottom:20px;">
-      <div class="ld-eyebrow">Contato</div>
-      <h2>Quer conversar antes de começar?</h2>
-      <p>Manda uma mensagem — respondemos em até um dia útil.</p>
-    </div>
-    <div class="ld-contato-email">contato@syncrow.com.br</div>
-  </section>
+      <section
+        class="ld-section"
+        id="recursos"
+        aria-labelledby="recursos-title"
+      >
+        <header class="ld-section-head" data-reveal>
+          <p class="ld-eyebrow">O que o Sincro faz</p>
+          <h2 id="recursos-title">
+            Menos tempo caçando informação, mais tempo produzindo
+          </h2>
+          <p>
+            Quatro recursos para acompanhar a operação de ponta a ponta — do
+            chão de fábrica até o cliente final.
+          </p>
+        </header>
 
-  <section class="ld-cta-final">
-    <h2>Pronto pra ver seus pedidos de um jeito diferente?</h2>
-    <button class="ld-btn-entrar" style="padding:13px 32px;font-size:14px;" onclick="window.location.href='login.html'">Entrar no sistema</button>
-  </section>
+        <div class="ld-features">
+          <article class="ld-feature" data-reveal>
+            <div class="ld-feature-icon" aria-hidden="true">01</div>
+            <h3>Kanban de produção</h3>
+            <p>
+              Cada lote passa por etapas configuráveis, deixando o fluxo de
+              produção claro em uma única tela.
+            </p>
+          </article>
+          <article class="ld-feature" data-reveal>
+            <div class="ld-feature-icon" aria-hidden="true">02</div>
+            <h3>Alertas automáticos</h3>
+            <p>
+              O sistema sinaliza lotes atrasados ou com prazo apertado antes que
+              o problema vire uma cobrança.
+            </p>
+          </article>
+          <article class="ld-feature" data-reveal>
+            <div class="ld-feature-icon" aria-hidden="true">03</div>
+            <h3>Portal do cliente</h3>
+            <p>
+              Cada confecção acompanha os próprios pedidos e consulta o status
+              sem precisar interromper a operação.
+            </p>
+          </article>
+          <article class="ld-feature" data-reveal>
+            <div class="ld-feature-icon" aria-hidden="true">04</div>
+            <h3>Assistente com permissão</h3>
+            <p>
+              Informações sobre prazos e produção podem ser consultadas em
+              linguagem natural respeitando cada perfil.
+            </p>
+          </article>
+        </div>
+      </section>
 
-  <footer class="ld-footer">
-    <div class="ld-brand">
-      <svg width="22" height="22" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="20" cy="20" r="19" fill="#5B4FC9" />
-        <path d="M11 24c2-6 5-11 11-11 4.5 0 7 2.6 8 5.4-1.6-.6-3-.6-4 .2 1.7.4 2.8 1.4 3.3 3-1.6-.9-3.1-1-4.4-.2.3 2-.5 3.6-2.1 4.6-2.6 1.6-6.6 1.5-9.6-.2Z" fill="#fff" />
-      </svg>
-      <span class="ld-brand-name" style="font-size:15px;">Syncrow</span>
-    </div>
-    <div class="ld-footer-nota">Projeto acadêmico desenvolvido como Trabalho de Conclusão de Curso.</div>
-  </footer>
+      <section
+        class="ld-section ld-processo"
+        id="como-funciona"
+        aria-labelledby="processo-title"
+      >
+        <header class="ld-section-head" data-reveal>
+          <p class="ld-eyebrow">Como funciona</p>
+          <h2 id="processo-title">Três passos, do pedido à entrega</h2>
+        </header>
 
-  <script>
-    window.addEventListener("scroll", () => {
-      document.getElementById("ldHeader").classList.toggle("scrolled", window.scrollY > 8);
-    });
-  </script>
-</body>
+        <ol class="ld-passos">
+          <li class="ld-passo" data-reveal>
+            <span class="ld-passo-numero">01</span>
+            <h3>Cadastre a ordem</h3>
+            <p>
+              Cliente, modelo, quantidade e prazo em uma única ordem de
+              produção.
+            </p>
+          </li>
+          <li class="ld-passo" data-reveal>
+            <span class="ld-passo-numero">02</span>
+            <h3>Acompanhe em tempo real</h3>
+            <p>
+              Veja cada lote avançar pelas etapas e mantenha o histórico da
+              operação organizado.
+            </p>
+          </li>
+          <li class="ld-passo" data-reveal>
+            <span class="ld-passo-numero">03</span>
+            <h3>Entregue com confiança</h3>
+            <p>
+              O cliente acompanha a evolução e chega ao fim do processo sabendo
+              exatamente o status.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <section
+        class="ld-planos-wrap"
+        id="planos"
+        aria-labelledby="planos-title"
+      >
+        <div class="ld-section">
+          <header class="ld-section-head" data-reveal>
+            <p class="ld-eyebrow">Sobre contratar</p>
+            <h2 id="planos-title">
+              Feito pra facção pequena, não pra ERP de grande indústria
+            </h2>
+            <p>
+              Uma experiência simples para começar a organizar a produção sem
+              transformar a operação em burocracia.
+            </p>
+          </header>
+
+          <div class="ld-planos">
+            <article class="ld-plano" data-reveal>
+              <p class="ld-plano-nome">Essencial</p>
+              <p class="ld-plano-preco">R$ 49<small>/usuário/mês</small></p>
+              <p class="ld-plano-desc">
+                Pra facção com um time pequeno começando a organizar a produção.
+              </p>
+              <ul>
+                <li>Kanban de produção</li>
+                <li>Timeline por pedido</li>
+                <li>Alertas automáticos</li>
+                <li>Portal do cliente</li>
+              </ul>
+              <a class="ld-plano-btn" href="login.html">Começar agora</a>
+            </article>
+
+            <article class="ld-plano destaque" data-reveal>
+              <span class="ld-plano-tag">Mais completo</span>
+              <p class="ld-plano-nome">Operação</p>
+              <p class="ld-plano-preco">R$ 89<small>/usuário/mês</small></p>
+              <p class="ld-plano-desc">
+                Pra quem já tem mais de um cliente contratante e precisa de
+                histórico.
+              </p>
+              <ul>
+                <li>Tudo do plano Essencial</li>
+                <li>Assistente de IA</li>
+                <li>Histórico completo</li>
+                <li>Kanban customizável</li>
+              </ul>
+              <a class="ld-plano-btn" href="login.html">Começar agora</a>
+            </article>
+
+            <article class="ld-plano" data-reveal>
+              <p class="ld-plano-nome">Sob consulta</p>
+              <p class="ld-plano-preco ld-plano-preco-consulta">
+                Fale com a gente
+              </p>
+              <p class="ld-plano-desc">
+                Pra redes de facções ou operações com necessidades específicas.
+              </p>
+              <ul>
+                <li>Tudo do plano Operação</li>
+                <li>Múltiplas unidades</li>
+                <li>Suporte prioritário</li>
+              </ul>
+              <a class="ld-plano-btn" href="#contato">Ver contato</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="ld-section ld-contato"
+        id="contato"
+        aria-labelledby="contato-title"
+      >
+        <div class="ld-contact-card" data-reveal>
+          <p class="ld-eyebrow">Contato</p>
+          <h2 id="contato-title">Quer conversar antes de começar?</h2>
+          <p>Manda uma mensagem — respondemos em até um dia útil.</p>
+          <a class="ld-contato-email" href="mailto:Suporte@sincro.com.br"
+            >Suporte@sincro.com.br</a
+          >
+        </div>
+      </section>
+
+      <section class="ld-cta-final" aria-labelledby="cta-title">
+        <div data-reveal>
+          <p class="ld-eyebrow">Sincro</p>
+          <h2 id="cta-title">
+            Pronto pra ver seus pedidos de um jeito diferente?
+          </h2>
+          <a class="ld-btn-entrar ld-btn-large" href="login.html"
+            >Entrar no sistema</a
+          >
+        </div>
+      </section>
+    </main>
+
+    <footer class="ld-footer">
+      <a class="ld-brand" href="#topo" aria-label="Voltar ao início">
+        <img class="ld-brand-mark" src="assets/Bola.png" alt="" />
+        <span class="ld-brand-name">Sincro</span>
+      </a>
+      <p class="ld-footer-nota">Visibilidade para uma produção que não para.</p>
+    </footer>
+
+    <script>
+      const header = document.getElementById("ldHeader");
+      const syncHeader = () =>
+        header.classList.toggle("scrolled", window.scrollY > 12);
+      syncHeader();
+      window.addEventListener("scroll", syncHeader, { passive: true });
+    </script>
+    <script src="js/scroll-animations.js"></script>
+    <script src="js/validacao-campos.js"></script>
+  </body>
 </html>

@@ -3,7 +3,11 @@ let usuarioAtualUsuarios = null;
 let editandoIdUsuario = null;
 
 async function iniciarUsuarios() {
-  usuarioAtualUsuarios = montarLayout({ itemAtivo: "usuarios", titulo: "Usuários", subtitulo: "Gestão de acesso ao sistema" });
+  usuarioAtualUsuarios = montarLayout({
+    itemAtivo: "usuarios",
+    titulo: "Usuários",
+    subtitulo: "Gestão de acesso ao sistema",
+  });
   if (!usuarioAtualUsuarios) return;
 
   if (usuarioAtualUsuarios.perfil !== "Administrador") {
@@ -45,7 +49,9 @@ async function iniciarUsuarios() {
     </div>
   `;
 
-  document.getElementById("btnNovo").addEventListener("click", () => abrirModal());
+  document
+    .getElementById("btnNovo")
+    .addEventListener("click", () => abrirModal());
   document.getElementById("btnCancelar").addEventListener("click", fecharModal);
   document.getElementById("btnSalvar").addEventListener("click", salvar);
   document.getElementById("fBusca").addEventListener("input", renderizarTabela);
@@ -67,16 +73,24 @@ async function carregar() {
 }
 
 function renderizarTabela() {
-  const termo = (document.getElementById("fBusca").value || "").trim().toLowerCase();
+  const termo = (document.getElementById("fBusca").value || "")
+    .trim()
+    .toLowerCase();
   const corpo = document.getElementById("corpoTabela");
   const vazio = document.getElementById("vazio");
   corpo.innerHTML = "";
 
-  const filtrados = usuariosCache.filter((u) =>
-    !termo || u.nome.toLowerCase().includes(termo) || u.email.toLowerCase().includes(termo)
+  const filtrados = usuariosCache.filter(
+    (u) =>
+      !termo ||
+      u.nome.toLowerCase().includes(termo) ||
+      u.email.toLowerCase().includes(termo),
   );
 
-  if (filtrados.length === 0) { vazio.style.display = "block"; return; }
+  if (filtrados.length === 0) {
+    vazio.style.display = "block";
+    return;
+  }
   vazio.style.display = "none";
 
   filtrados.forEach((u) => {
@@ -94,19 +108,31 @@ function renderizarTabela() {
     corpo.appendChild(tr);
   });
 
-  corpo.querySelectorAll('[data-acao="editar"]').forEach((btn) => btn.addEventListener("click", () => abrirModal(btn.dataset.id)));
-  corpo.querySelectorAll('[data-acao="excluir"]').forEach((btn) => btn.addEventListener("click", () => excluir(btn.dataset.id)));
+  corpo
+    .querySelectorAll('[data-acao="editar"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () => abrirModal(btn.dataset.id)),
+    );
+  corpo
+    .querySelectorAll('[data-acao="excluir"]')
+    .forEach((btn) =>
+      btn.addEventListener("click", () => excluir(btn.dataset.id)),
+    );
 }
 
 function abrirModal(id = null) {
   editandoIdUsuario = id;
   const registro = id ? usuariosCache.find((u) => u.id === id) : null;
 
-  document.getElementById("modalTitulo").textContent = id ? "Editar usuário" : "Novo usuário";
+  document.getElementById("modalTitulo").textContent = id
+    ? "Editar usuário"
+    : "Novo usuário";
   document.getElementById("fNome").value = registro?.nome || "";
   document.getElementById("fEmail").value = registro?.email || "";
   document.getElementById("fSenha").value = "";
-  document.getElementById("fSenha").placeholder = id ? "Nova senha (deixa em branco pra manter a atual)" : "Senha inicial";
+  document.getElementById("fSenha").placeholder = id
+    ? "Nova senha (deixa em branco pra manter a atual)"
+    : "Senha inicial";
   document.getElementById("fPerfil").value = registro?.perfil || "Vendedor";
   document.getElementById("modalFundo").classList.add("aberto");
 }
@@ -123,14 +149,25 @@ async function salvar() {
     perfil: document.getElementById("fPerfil").value,
   };
 
-  if (!dados.nome || !dados.email) { alert("Preenche nome e e-mail."); return; }
-  if (!editandoIdUsuario && !dados.senha) { alert("Senha inicial é obrigatória pra um usuário novo."); return; }
+  if (!dados.nome || !dados.email) {
+    alert("Preenche nome e e-mail.");
+    return;
+  }
+  if (!editandoIdUsuario && !dados.senha) {
+    alert("Senha inicial é obrigatória pra um usuário novo.");
+    return;
+  }
   if (!dados.senha) delete dados.senha;
 
   if (editandoIdUsuario) {
     const registroAtual = usuariosCache.find((u) => u.id === editandoIdUsuario);
-    if (registroAtual.perfil === "Administrador" && dados.perfil !== "Administrador") {
-      const outrosAdmins = usuariosCache.filter((u) => u.perfil === "Administrador" && u.id !== editandoIdUsuario);
+    if (
+      registroAtual.perfil === "Administrador" &&
+      dados.perfil !== "Administrador"
+    ) {
+      const outrosAdmins = usuariosCache.filter(
+        (u) => u.perfil === "Administrador" && u.id !== editandoIdUsuario,
+      );
       if (outrosAdmins.length === 0) {
         alert("Não é possível rebaixar o último Administrador do sistema.");
         return;
@@ -143,7 +180,11 @@ async function salvar() {
   botao.textContent = "Salvando...";
   try {
     if (editandoIdUsuario) {
-      const atualizado = await apiAtualizarItem("usuarios", editandoIdUsuario, dados);
+      const atualizado = await apiAtualizarItem(
+        "usuarios",
+        editandoIdUsuario,
+        dados,
+      );
       if (editandoIdUsuario === usuarioAtualUsuarios.id) {
         const atualizadoPublico = { ...atualizado };
         delete atualizadoPublico.senha;
@@ -165,13 +206,17 @@ async function salvar() {
 
 async function excluir(id) {
   if (id === usuarioAtualUsuarios.id) {
-    alert("Você não pode excluir o próprio usuário enquanto está logado com ele.");
+    alert(
+      "Você não pode excluir o próprio usuário enquanto está logado com ele.",
+    );
     return;
   }
 
   const registro = usuariosCache.find((u) => u.id === id);
   if (registro?.perfil === "Administrador") {
-    const outrosAdmins = usuariosCache.filter((u) => u.perfil === "Administrador" && u.id !== id);
+    const outrosAdmins = usuariosCache.filter(
+      (u) => u.perfil === "Administrador" && u.id !== id,
+    );
     if (outrosAdmins.length === 0) {
       alert("Não é possível excluir o último Administrador do sistema.");
       return;
