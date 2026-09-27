@@ -228,15 +228,11 @@ function renderizarBoard() {
       renderizarBoard();
 
       try {
-        await apiAtualizarPedido(id, { coluna: etapa.chave });
-        await apiCriarEvento({
-          pedidoId: id,
-          etapa: etapa.chave,
-          observacao: "",
-        });
+        await apiAlterarEtapa(id, etapa.chave);
       } catch (erro) {
         pedido.coluna = colunaAnterior;
         renderizarBoard();
+
         alert(`Não foi possível mover a ordem: ${erro.message}`);
       }
     });

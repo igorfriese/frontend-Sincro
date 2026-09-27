@@ -5,38 +5,71 @@
 // ===================================================================
 
 function tokenSalvo() {
-  return sessionStorage.getItem("syncrowToken");
+  return sessionStorage.getItem("sincroToken");
 }
 
 function usuarioLogado() {
-  const dados = sessionStorage.getItem("syncrowUsuario");
+  const dados = sessionStorage.getItem("sincroUsuario");
   return dados ? JSON.parse(dados) : null;
 }
 
 function salvarSessao(token, usuario) {
-  sessionStorage.setItem("syncrowToken", token);
-  sessionStorage.setItem("syncrowUsuario", JSON.stringify(usuario));
+  sessionStorage.setItem("sincroToken", token);
+  sessionStorage.setItem("sincroUsuario", JSON.stringify(usuario));
 }
 
 function limparSessao() {
-  sessionStorage.removeItem("syncrowToken");
-  sessionStorage.removeItem("syncrowUsuario");
+  sessionStorage.removeItem("sincroToken");
+  sessionStorage.removeItem("sincroUsuario");
+}
+
+// ===================================================================
+// API
+// ===================================================================
+
+const API_BASE_URL = "https://localhost:7206/api";
+
+async function apiRequest(endpoint, options = {}) {
+  const resposta = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(tokenSalvo() ? { Authorization: `Bearer ${tokenSalvo()}` } : {}),
+      ...(options.headers || {}),
+    },
+  });
+
+  if (!resposta.ok) {
+    let mensagem = `Erro HTTP ${resposta.status}`;
+
+    try {
+      const dados = await resposta.json();
+
+      mensagem = dados?.mensagem || dados?.erro || dados?.title || mensagem;
+    } catch {
+      // Mantém a mensagem padrão caso a API não retorne JSON.
+    }
+
+    throw new Error(mensagem);
+  }
+
+  if (resposta.status == 204) {
+    return null;
+  }
+
+  return await resposta.json();
 }
 
 // ---------- Autenticação ----------
 async function apiLogin(email, senha) {
-  const db = carregarBanco();
-  const usuario = db.usuarios.find(
-    (u) => u.email === email && u.senha === senha,
-  );
-  if (!usuario) throw new Error("Credenciais inválidas");
+  const dados = await apiRequest("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, senha }),
+  });
 
-  const token = `local-${usuario.id}-${Date.now()}`;
-  const usuarioPublico = { ...usuario };
-  delete usuarioPublico.senha;
+  salvarSessao(dados.token, dados.usuario);
 
-  salvarSessao(token, usuarioPublico);
-  return usuarioPublico;
+  return dados.usuario;
 }
 
 // ---------- Pedidos ----------
@@ -46,13 +79,27 @@ async function apiLogin(email, senha) {
 // pedidos (Kanban, Alertas, Histórico, Dashboard, Assistente) sem
 // cada uma precisar reimplementar o filtro.
 async function apiListarPedidos() {
-  const pedidos = carregarBanco().pedidos;
-  const usuario = usuarioLogado();
-  if (usuario?.perfil === "Vendedor") {
-    return pedidos.filter((p) => p.responsavelId === usuario.id);
-  }
-  return pedidos;
+  const pedidos = await apiRequest("/Pedidos");
+
+  return pedidos.map((pedido) => ({
+    id: String(pedido.id),
+    cliente: pedido.cliente?.nome || `Cliente #${pedido.clienteId}`,
+    modelo: pedido.produto?.nome || `Produto #${pedido.produtoId}`,
+    qtd: pedido.quantidade,
+    prazo: pedido.prazo?.split("T")[0] || "",
+    responsaveId: pedido.responsaveId ? String(pedido.responsaveId) : null,
+    urgente: pedido.urgente,
+    coluna: pedido.coluna,
+  }));
 }
+
+async function apiAlterarEtapa(id, novaEtapa) {
+  return await apiRequest(`/Pedidos/${id}/etapa`, {
+    method: "PUT",
+    body: JSON.stringify(novaEtapa),
+  });
+}
+
 // Sem o filtro por perfil — usado só pra checagens de integridade
 // referencial (ex: "esse cliente tem pedidos de QUALQUER responsável
 // antes de excluir?"), onde a resposta não pode depender de quem
