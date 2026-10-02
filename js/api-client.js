@@ -108,9 +108,19 @@ async function apiListarTodosPedidos() {
   return carregarBanco().pedidos;
 }
 async function apiBuscarPedido(id) {
-  const pedido = carregarBanco().pedidos.find((p) => p.id === id);
-  if (!pedido) throw new Error(`Pedido #${id} não encontrado`);
-  return pedido;
+  const pedido = await apiRequest(`/Pedidos/${id}`);
+
+  return {
+    id: String(pedido.id),
+    cliente: pedido.cliente?.nome || `Cliente #${pedido.clienteId}`,
+    modelo: pedido.produto?.nome || `Produto #${pedido.produtoId}`,
+    qtd: pedido.quantidade,
+    prazo: pedido.prazo?.split("T")[0] || "",
+    responsaveId: pedido.responsaveId ? String(pedido.responsaveId) : null,
+    urgente: pedido.urgente,
+    coluna: pedido.coluna,
+    clienteTokenAcompanhamento: pedido.cliente?.tokenAcompanhamento || null,
+  };
 }
 async function apiCriarPedido(pedido) {
   const db = carregarBanco();
@@ -144,9 +154,8 @@ async function apiExcluirPedido(id) {
 
 // ---------- Eventos (timeline) ----------
 async function apiListarEventosDoPedido(pedidoId) {
-  const eventos = carregarBanco().eventos.filter(
-    (e) => e.pedidoId === pedidoId,
-  );
+  const eventos = await apiRequest(`/Eventos/pedido/${pedidoId}`);
+
   return eventos.sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora));
 }
 async function apiCriarEvento(evento) {
@@ -203,17 +212,9 @@ async function apiExcluirItem(colecao, id) {
 // ---------- Portal do Cliente — rota "pública" (não olha sessão nenhuma) ----------
 // O link é por CLIENTE, não por pedido: mostra todos os pedidos dele.
 async function apiAcompanharCliente(tokenPublico) {
-  const db = carregarBanco();
-  const cliente = (db.clientes || []).find(
-    (c) => c.tokenAcompanhamento === tokenPublico,
+  return await apiRequest(
+    `/Pedidos/publico/cliente/${encodeURIComponent(tokenPublico)}`,
   );
-  if (!cliente) throw new Error("Link inválido ou cliente não encontrado");
-
-  const pedidos = db.pedidos
-    .filter((p) => p.cliente === cliente.nome)
-    .sort((a, b) => new Date(a.prazo) - new Date(b.prazo));
-
-  return { cliente, pedidos };
 }
 
 async function apiEventosDoPedidoPublico(pedidoId) {

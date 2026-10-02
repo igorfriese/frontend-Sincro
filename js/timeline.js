@@ -22,16 +22,15 @@ async function iniciarTimeline() {
     const pedido = await apiBuscarPedido(id);
     const eventos = await apiListarEventosDoPedido(id);
     const etapas = await carregarEtapas();
-    const clientes = await apiListar("clientes");
-    const clienteDoPedido = clientes.find((c) => c.nome === pedido.cliente);
-    desenharTimeline(pedido, eventos, etapas, clienteDoPedido);
+
+    desenharTimeline(pedido, eventos, etapas);
   } catch (erro) {
     document.getElementById("page-content").innerHTML =
       `<div class="sy-erro-banner">${erro.message}</div>`;
   }
 }
 
-function desenharTimeline(pedido, eventos, etapas, clienteDoPedido) {
+function desenharTimeline(pedido, eventos, etapas) {
   const sev = severidadePrazo(pedido.prazo);
   const badgeClasse =
     sev === "red"
@@ -87,9 +86,9 @@ function desenharTimeline(pedido, eventos, etapas, clienteDoPedido) {
     .join("");
 
   // O link agora é por CLIENTE — mostra todos os pedidos dele, não só este.
-  const linkPublico = clienteDoPedido
+  const linkPublico = pedido.clienteTokenAcompanhamento
     ? window.location.href.replace(/timeline\.html.*$/, "portal-cliente.html") +
-      `?token=${clienteDoPedido.tokenAcompanhamento}`
+      `?token=${pedido.clienteTokenAcompanhamento}`
     : null;
 
   document.getElementById("page-content").innerHTML = `
@@ -167,7 +166,7 @@ function desenharTimeline(pedido, eventos, etapas, clienteDoPedido) {
       try {
         await apiAtualizarPedido(pedido.id, { urgente: ev.target.checked });
         pedido.urgente = ev.target.checked;
-        desenharTimeline(pedido, eventos, etapas, clienteDoPedido);
+        desenharTimeline(pedido, eventos, etapas);
       } catch (erro) {
         alert(`Não foi possível atualizar: ${erro.message}`);
         ev.target.checked = !ev.target.checked;
@@ -204,12 +203,7 @@ function desenharTimeline(pedido, eventos, etapas, clienteDoPedido) {
         await apiAtualizarPedido(pedido.id, { coluna: novaEtapa });
         const pedidoAtualizado = await apiBuscarPedido(pedido.id);
         const eventosAtualizados = await apiListarEventosDoPedido(pedido.id);
-        desenharTimeline(
-          pedidoAtualizado,
-          eventosAtualizados,
-          etapas,
-          clienteDoPedido,
-        );
+        desenharTimeline(pedidoAtualizado, eventosAtualizados, etapas);
       } catch (erro) {
         erroBox.textContent = erro.message;
         erroBox.style.display = "block";

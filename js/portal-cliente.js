@@ -1,5 +1,44 @@
 let etapasPortal = [];
 
+function obterDiasParaPrazo(prazo) {
+  if (!prazo) return null;
+
+  const dataPrazo = new Date(prazo);
+
+  if (Number.isNaN(dataPrazo.getTime())) {
+    return null;
+  }
+
+  const hoje = new Date();
+
+  hoje.setHours(0, 0, 0, 0);
+  dataPrazo.setHours(0, 0, 0, 0);
+
+  const diferenca = dataPrazo.getTime() - hoje.getTime();
+  return Math.ceil(diferenca / (1000 * 60 * 60 * 24));
+}
+
+function severidadePrazo(pedido) {
+  const dias = obterDiasParaPrazo(pedido.prazo);
+
+  if (dias === null) return "ok";
+  if (dias < 0) return "red";
+  if (dias <= 3) return "amber";
+
+  return "ok";
+}
+
+function textoPrazo(prazo) {
+  const dias = obterDiasParaPrazo(prazo);
+
+  if (dias === null) return "Prazo indisponível";
+  if (dias < 0) return `${Math.abs(dias)}d atrasado`;
+  if (dias === 0) return "Vence hoje";
+  if (dias === 1) return "1d p/ prazo";
+
+  return `${dias}d p/ prazo`;
+}
+
 async function iniciarPortalCliente() {
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
@@ -20,12 +59,6 @@ async function iniciarPortalCliente() {
 }
 
 function desenharPortal(cliente, pedidos) {
-  const abertos = pedidos.filter(
-    (p) =>
-      severidadePrazo(p.prazo) !== "ok" ||
-      p.coluna !== etapasPortal[etapasPortal.length - 1]?.chave,
-  );
-
   const listaHtml = pedidos.length
     ? pedidos.map((p) => criarLinhaPedido(p)).join("")
     : `<div class="sy-card" style="padding:24px;text-align:center;color:var(--sy-ink-soft);">Nenhum pedido encontrado para esse cliente.</div>`;
@@ -46,7 +79,7 @@ function desenharPortal(cliente, pedidos) {
 }
 
 function criarLinhaPedido(pedido) {
-  const sev = severidadePrazo(pedido.prazo);
+  const sev = severidadePrazo(pedido);
   const badgeClasse =
     sev === "red"
       ? "sy-badge-red"

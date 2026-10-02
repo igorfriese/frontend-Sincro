@@ -290,15 +290,13 @@ function criarCard(pedido, cor) {
         !confirm(
           `Marcar o pedido #${pedido.id} como "${etapaUltima.nome}"? Ele sairá do Kanban e ficará só no Histórico.`,
         )
-      )
+      ) {
         return;
+      }
+
       try {
-        await apiAtualizarPedido(pedido.id, { coluna: etapaUltima.chave });
-        await apiCriarEvento({
-          pedidoId: pedido.id,
-          etapa: etapaUltima.chave,
-          observacao: "",
-        });
+        await apiAlterarEtapa(pedido.id, etapaUltima.chave);
+
         pedido.coluna = etapaUltima.chave;
         renderizarBoard();
       } catch (erro) {
