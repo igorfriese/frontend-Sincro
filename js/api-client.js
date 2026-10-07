@@ -1,7 +1,7 @@
 // ===================================================================
-// API CLIENT — mesma interface de antes (apiListarPedidos, apiLogin,
-// etc.), só que agora lendo/escrevendo do localStorage (js/local-db.js)
-// em vez de fazer fetch() pra um servidor. Nenhuma tela precisa mudar.
+// API CLIENT — centraliza a comunicação do frontend com a API do Sincro.
+// Mantém uma interface única para autenticação, pedidos, eventos,
+// clientes, produtos e usuários.
 // ===================================================================
 
 function tokenSalvo() {
@@ -87,10 +87,25 @@ async function apiListarPedidos() {
     modelo: pedido.produto?.nome || `Produto #${pedido.produtoId}`,
     qtd: pedido.quantidade,
     prazo: pedido.prazo?.split("T")[0] || "",
-    responsaveId: pedido.responsaveId ? String(pedido.responsaveId) : null,
+    responsavelId: pedido.responsavelId ? String(pedido.responsavelId) : null,
     urgente: pedido.urgente,
     coluna: pedido.coluna,
   }));
+}
+
+async function apiListarClientes() {
+  const dados = await apiRequest("/clientes?pagina=1&tamanho=1000");
+  return dados.clientes || [];
+}
+
+async function apiListarProdutos() {
+  const dados = await apiRequest("/produtos?pagina=1&tamanho=1000");
+  return dados.produtos || [];
+}
+
+async function apiListarUsuarios() {
+  const dados = await apiRequest("/usuarios?pagina=1&tamanho=1000");
+  return dados.usuarios || [];
 }
 
 async function apiAlterarEtapa(id, novaEtapa) {
@@ -100,12 +115,44 @@ async function apiAlterarEtapa(id, novaEtapa) {
   });
 }
 
+// ---------- Etapas / Colunas ----------
+
+async function apiListarEtapas() {
+  return await apiRequest("/Etapas");
+}
+
+async function apiCriarEtapa(etapa) {
+  return await apiRequest("/Etapas", {
+    method: "POST",
+    body: JSON.stringify(etapa),
+  });
+}
+
+async function apiAtualizarEtapa(id, etapa) {
+  return await apiRequest(`/Etapas/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      id: Number(id),
+      chave: etapa.chave,
+      nome: etapa.nome,
+      cor: etapa.cor,
+      ordem: etapa.ordem,
+    }),
+  });
+}
+
+async function apiExcluirEtapa(id) {
+  return await apiRequest(`/Etapas/${id}`, {
+    method: "DELETE",
+  });
+}
+
 // Sem o filtro por perfil — usado só pra checagens de integridade
 // referencial (ex: "esse cliente tem pedidos de QUALQUER responsável
 // antes de excluir?"), onde a resposta não pode depender de quem
 // está logado.
 async function apiListarTodosPedidos() {
-  return carregarBanco().pedidos;
+  return await apiRequest("/Pedidos");
 }
 async function apiBuscarPedido(id) {
   const pedido = await apiRequest(`/Pedidos/${id}`);
@@ -116,40 +163,50 @@ async function apiBuscarPedido(id) {
     modelo: pedido.produto?.nome || `Produto #${pedido.produtoId}`,
     qtd: pedido.quantidade,
     prazo: pedido.prazo?.split("T")[0] || "",
-    responsaveId: pedido.responsaveId ? String(pedido.responsaveId) : null,
+    responsavelId: pedido.responsavelId ? String(pedido.responsavelId) : null,
     urgente: pedido.urgente,
     coluna: pedido.coluna,
     clienteTokenAcompanhamento: pedido.cliente?.tokenAcompanhamento || null,
   };
 }
-async function apiCriarPedido(pedido) {
-  const db = carregarBanco();
-  const etapas = (db.etapas || []).slice().sort((a, b) => a.ordem - b.ordem);
-  const primeiraEtapa = etapas[0]?.chave || "corte";
 
-  const novo = {
-    urgente: false,
-    ...pedido,
-    id: proximoIdDe(db.pedidos),
-    coluna: primeiraEtapa,
+async function apiCriarPedido(pedido) {
+  const body = {
+    clienteId: pedido.clienteId,
+    produtoId: pedido.produtoId,
+    responsavelId: pedido.responsavelId,
+    quantidade: Number(pedido.qtd),
+    prazo: `${pedido.prazo}T00:00:00`,
+    urgente: !!pedido.urgente,
+    coluna: pedido.coluna || "corte",
   };
-  db.pedidos.push(novo);
-  salvarBanco(db);
-  return novo;
+
+  return await apiRequest("/Pedidos", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }
+
 async function apiAtualizarPedido(id, campos) {
-  const db = carregarBanco();
-  const pedido = db.pedidos.find((p) => p.id === id);
-  if (!pedido) throw new Error(`Pedido #${id} não encontrado`);
-  Object.assign(pedido, campos);
-  salvarBanco(db);
-  return pedido;
-}
-async function apiExcluirPedido(id) {
-  const db = carregarBanco();
-  db.pedidos = db.pedidos.filter((p) => p.id !== id);
-  salvarBanco(db);
-  return { deletado: true };
+  const atual = await apiRequest(`/Pedidos/${id}`);
+
+  const atualizado = {
+    clienteId: campos.clienteId ?? atual.clienteId,
+    produtoId: campos.produtoId ?? atual.produtoId,
+    responsavelId:
+      campos.responsavelId !== undefined
+        ? campos.responsavelId
+        : atual.responsavelId,
+    quantidade: campos.qtd ?? campos.quantidade ?? atual.quantidade,
+    prazo: campos.prazo ? `${campos.prazo}T00:00:00` : atual.prazo,
+    urgente: campos.urgente !== undefined ? campos.urgente : atual.urgente,
+    coluna: campos.coluna ?? atual.coluna,
+  };
+
+  return await apiRequest(`/Pedidos/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ id: Number(id), ...atualizado }),
+  });
 }
 
 // ---------- Eventos (timeline) ----------
@@ -159,15 +216,15 @@ async function apiListarEventosDoPedido(pedidoId) {
   return eventos.sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora));
 }
 async function apiCriarEvento(evento) {
-  const db = carregarBanco();
-  const novo = {
-    ...evento,
-    id: proximoIdDe(db.eventos),
-    dataHora: evento.dataHora || new Date().toISOString(),
-  };
-  db.eventos.push(novo);
-  salvarBanco(db);
-  return novo;
+  return await apiRequest("/Eventos", {
+    method: "POST",
+    body: JSON.stringify({
+      pedidoId: evento.pedidoId,
+      etapa: evento.etapa,
+      observacao: evento.observacao || "",
+      dataHora: evento.dataHora || new Date().toISOString(),
+    }),
+  });
 }
 
 // ---------- CRUD genérico — usado por Clientes, Produtos e Usuários ----------
@@ -217,9 +274,10 @@ async function apiAcompanharCliente(tokenPublico) {
   );
 }
 
-async function apiEventosDoPedidoPublico(pedidoId) {
-  const db = carregarBanco();
-  return db.eventos
-    .filter((e) => e.pedidoId === pedidoId)
-    .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora));
+async function apiEventosDoPedidoPublico(tokenPublico, pedidoId) {
+  const eventos = await apiRequest(
+    `/Eventos/publico/cliente/${encodeURIComponent(tokenPublico)}/pedido/${pedidoId}`,
+  );
+
+  return eventos.sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora));
 }
