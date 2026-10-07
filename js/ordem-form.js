@@ -4,6 +4,7 @@ let usuariosDisponiveis = [];
 let clienteSelecionado = null;
 let produtoSelecionado = null;
 let usuarioAtualForm = null;
+let pedidoAtualColuna = "corte";
 
 async function iniciarFormOrdem() {
   usuarioAtualForm = montarLayout({
@@ -19,12 +20,19 @@ async function iniciarFormOrdem() {
   let pedidoAtual = null;
   try {
     [clientesDisponiveis, produtosDisponiveis] = await Promise.all([
-      apiListar("clientes"),
-      apiListar("produtos"),
+      apiListarClientes(),
+      apiListarProdutos(),
     ]);
     if (usuarioAtualForm.perfil !== "Vendedor")
-      usuariosDisponiveis = await apiListar("usuarios");
-    if (idEdicao) pedidoAtual = await apiBuscarPedido(idEdicao);
+      usuariosDisponiveis = await apiListarUsuarios();
+
+    if (idEdicao) {
+      pedidoAtual = await apiBuscarPedido(idEdicao);
+    }
+
+    if (pedidoAtual?.coluna) {
+      pedidoAtualColuna = pedidoAtual.coluna;
+    }
   } catch (erro) {
     document.getElementById("page-content").innerHTML =
       `<div class="sy-erro-banner">${erro.message}</div>`;
@@ -43,7 +51,7 @@ async function iniciarFormOrdem() {
       ? `<input class="login-input" value="${usuarioAtualForm.nome} (você)" disabled style="opacity:.7;">`
       : `<select class="login-input" id="fResponsavel">
         <option value="">Selecione um responsável...</option>
-        ${usuariosDisponiveis.map((u) => `<option value="${u.id}" ${pedidoAtual?.responsavelId === u.id ? "selected" : ""}>${u.nome} (${u.perfil})</option>`).join("")}
+        ${usuariosDisponiveis.map((u) => `<option value="${u.id}" ${pedidoAtual?.responsavelId === u.id ? "selected" : ""}>${u.nome} (${u.role})</option>`).join("")}
       </select>`;
 
   document.getElementById("page-content").innerHTML = `
@@ -155,7 +163,7 @@ function configurarAutocomplete({
       lista.querySelectorAll(".ac-item").forEach((el) => {
         el.addEventListener("mousedown", (ev) => {
           ev.preventDefault(); // evita o blur do input disparar antes do click
-          const item = itens.find((it) => it.id === el.dataset.id);
+          const item = itens.find((it) => String(it.id) === el.dataset.id);
           input.value = item.nome;
           lista.style.display = "none";
           aoSelecionar(item);
@@ -205,12 +213,13 @@ async function salvar(idEdicao) {
   }
 
   const dados = {
-    cliente: clienteSelecionado.nome,
-    modelo: produtoSelecionado.nome,
+    clienteId: clienteSelecionado.id,
+    modeloId: produtoSelecionado.id,
     qtd: Number(document.getElementById("fQtd").value),
     prazo: document.getElementById("fPrazo").value,
     urgente: document.getElementById("fUrgente").checked,
     responsavelId,
+    coluna: pedidoAtualColuna,
   };
 
   if (!dados.qtd || !dados.prazo) {
@@ -229,6 +238,7 @@ async function salvar(idEdicao) {
       await apiAtualizarPedido(idEdicao, dados);
     } else {
       const criado = await apiCriarPedido(dados);
+
       await apiCriarEvento({
         pedidoId: criado.id,
         etapa: criado.coluna,
