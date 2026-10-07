@@ -114,7 +114,7 @@ async function carregarPedidos() {
   const erroBox = document.getElementById("kbErro");
   try {
     pedidosCache = await apiListarPedidos();
-    etapasCache = await carregarEtapas();
+    etapasCache = await apiListarEtapas();
     erroBox.style.display = "none";
   } catch (erro) {
     erroBox.textContent = `Não foi possível carregar as ordens: ${erro.message}`;
@@ -391,7 +391,9 @@ function atualizarSelecaoDeCor() {
 
 function abrirModalEditarColuna(id = null) {
   editandoEtapaId = id;
-  const etapa = id ? etapasCache.find((e) => e.id === id) : null;
+  const etapa = id
+    ? etapasCache.find((e) => String(e.id) === String(id))
+    : null;
 
   document.getElementById("modalEditarColunaTitulo").textContent = id
     ? "Editar coluna"
@@ -437,26 +439,37 @@ async function salvarColuna() {
 
   try {
     if (editandoEtapaId) {
-      await apiAtualizarItem("etapas", editandoEtapaId, {
+      const etapaAtual = etapasCache.find(
+        (e) => String(e.id) === String(editandoEtapaId),
+      );
+
+      if (!etapaAtual) {
+        throw new Error("Etapa não encontrada.");
+      }
+
+      await apiAtualizarEtapa(editandoEtapaId, {
+        chave: etapaAtual.chave,
         nome,
         cor: corSelecionada,
+        ordem: etapaAtual.ordem,
       });
     } else {
       const maiorOrdem = etapasCache.reduce(
         (max, e) => Math.max(max, e.ordem),
         0,
       );
-      await apiCriarItem("etapas", {
+
+      await apiCriarEtapa({
+        chave: gerarChaveUnica(nome),
         nome,
         cor: corSelecionada,
-        chave: gerarChaveUnica(nome),
         ordem: maiorOrdem + 1,
       });
     }
     document
       .getElementById("modalEditarColunaFundo")
       .classList.remove("aberto");
-    etapasCache = await carregarEtapas();
+    etapasCache = await apiListarEtapas();
     renderizarTabelaColunas();
     renderizarBoard();
   } catch (erro) {
@@ -469,7 +482,7 @@ async function salvarColuna() {
 }
 
 async function excluirColuna(id) {
-  const etapa = etapasCache.find((e) => e.id === id);
+  const etapa = etapasCache.find((e) => String(e.id) === String(id));
   const qtdPedidos = pedidosCache.filter(
     (p) => p.coluna === etapa.chave,
   ).length;
@@ -483,8 +496,8 @@ async function excluirColuna(id) {
   if (!confirm(`Excluir a coluna "${etapa.nome}"?`)) return;
 
   try {
-    await apiExcluirItem("etapas", id);
-    etapasCache = await carregarEtapas();
+    await apiExcluirEtapa(id);
+    etapasCache = await apiListarEtapas();
     renderizarTabelaColunas();
     renderizarBoard();
   } catch (erro) {
@@ -493,7 +506,7 @@ async function excluirColuna(id) {
 }
 
 async function moverColuna(id, direcao) {
-  const indice = etapasCache.findIndex((e) => e.id === id);
+  const indice = etapasCache.findIndex((e) => String(e.id) === String(id));
   const indiceVizinho = indice + direcao;
   if (indiceVizinho < 0 || indiceVizinho >= etapasCache.length) return;
 
@@ -501,9 +514,21 @@ async function moverColuna(id, direcao) {
   const vizinho = etapasCache[indiceVizinho];
 
   try {
-    await apiAtualizarItem("etapas", atual.id, { ordem: vizinho.ordem });
-    await apiAtualizarItem("etapas", vizinho.id, { ordem: atual.ordem });
-    etapasCache = await carregarEtapas();
+    await apiAtualizarEtapa(atual.id, {
+      chave: atual.chave,
+      nome: atual.nome,
+      cor: atual.cor,
+      ordem: vizinho.ordem,
+    });
+
+    await apiAtualizarEtapa(vizinho.id, {
+      chave: vizinho.chave,
+      nome: vizinho.nome,
+      cor: vizinho.cor,
+      ordem: atual.ordem,
+    });
+
+    etapasCache = await apiListarEtapas();
     renderizarTabelaColunas();
     renderizarBoard();
   } catch (erro) {
