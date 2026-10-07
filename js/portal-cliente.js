@@ -1,3 +1,4 @@
+let tokenAtual = null;
 let etapasPortal = [];
 
 function obterDiasParaPrazo(prazo) {
@@ -42,6 +43,7 @@ function textoPrazo(prazo) {
 async function iniciarPortalCliente() {
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
+  tokenAtual = token;
   const conteudo = document.getElementById("conteudo");
 
   if (!token) {
@@ -116,7 +118,7 @@ async function alternarPedido(pedido) {
   }
 
   if (!painel.dataset.carregado) {
-    const eventos = await apiEventosDoPedidoPublico(pedido.id);
+    const eventos = await apiEventosDoPedidoPublico(tokenAtual, pedido.id);
     const indiceAtual = etapasPortal.findIndex(
       (e) => e.chave === pedido.coluna,
     );
