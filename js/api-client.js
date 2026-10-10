@@ -209,6 +209,12 @@ async function apiAtualizarPedido(id, campos) {
   });
 }
 
+async function apiExcluirPedido(id) {
+  return await apiRequest(`/Pedidos/${id}`, {
+    method: "DELETE",
+  });
+}
+
 // ---------- Eventos (timeline) ----------
 async function apiListarEventosDoPedido(pedidoId) {
   const eventos = await apiRequest(`/Eventos/pedido/${pedidoId}`);

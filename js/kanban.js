@@ -235,6 +235,20 @@ function renderizarBoard() {
 
         alert(`Não foi possível mover a ordem: ${erro.message}`);
       }
+
+      try {
+        await apiCriarEvento({
+          pedidoId: Number(id),
+          etapa: etapa.chave,
+          observacao: `Pedido movido pelo kanban para "${etapa.nome}".`,
+        });
+      } catch (erro) {
+        console.error("Erro ao registrar evento:", erro);
+
+        alert(
+          `A ordem foi movida para "${etapa.nome}", mas não foi possível registar o evento na Timeline: ${erro.message}`,
+        );
+      }
     });
 
     board.appendChild(coluna);
@@ -270,7 +284,8 @@ function criarCard(pedido, cor) {
     <div class="kb-card-client">${pedido.cliente}</div>
     <div class="kb-card-model">${pedido.modelo}</div>
     <div class="kb-card-foot"><span class="kb-card-qty">${pedido.qtd} un.</span><span class="kb-card-qty">${formatarDataCurta(pedido.prazo)}</span></div>
-    ${podeFinalizar ? `<button class="cd-btn-icone" data-acao-finalizar="${pedido.id}" style="width:100%;margin-top:8px;">Marcar como "${etapaUltima.nome}" →</button>` : ""}`;
+    ${podeFinalizar ? `<button class="cd-btn-icone" data-acao-finalizar="${pedido.id}" style="width:100%;margin-top:8px;">Marcar como "${etapaUltima.nome}" →</button>` : ""}
+    ${usuarioAtualKanban.perfil === "Administrador" ? `<button class="cd-btn-icone excluir" data-acao-excluir="${pedido.id}" style="width:100%;margin-top:8px;">Excluir Pedido</button>` : ""}`;
 
   card.addEventListener(
     "click",
@@ -301,6 +316,49 @@ function criarCard(pedido, cor) {
         renderizarBoard();
       } catch (erro) {
         alert(`Não foi possível finalizar: ${erro.message}`);
+
+        return;
+      }
+
+      try {
+        await apiCriarEvento({
+          pedidoId: Number(pedido.id),
+          etapa: etapaUltima.chave,
+          observacao: `Pedido finalizado na etapa "${etapaUltima.nome}".`,
+        });
+      } catch (erro) {
+        console.error("Erro ao registrar a finalização", erro);
+
+        alert(
+          `O pedido foi finalizado, mas não foi possível registrar o evento: ${erro.message}`,
+        );
+      }
+    });
+  }
+
+  const botaoExcluir = card.querySelector("[data-acao-excluir]");
+
+  if (botaoExcluir) {
+    botaoExcluir.addEventListener("click", async (ev) => {
+      ev.stopPropagation();
+
+      const confirmou = confirm(
+        `Deseja excluir permanentemente o pedido #${pedido.id}? Esta ação não pode ser desfeita.`,
+      );
+
+      if (!confirmou) return;
+      botaoExcluir.disabled = true;
+
+      try {
+        await apiExcluirPedido(pedido.id);
+        pedidosCache = pedidosCache.filter(
+          (p) => String(p.id) !== String(pedido.id),
+        );
+
+        renderizarBoard();
+      } catch (erro) {
+        alert(`Não foi possível excluir o pedido: ${erro.message}`);
+        botaoExcluir.disabled = false;
       }
     });
   }

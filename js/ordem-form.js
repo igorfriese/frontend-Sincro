@@ -214,7 +214,7 @@ async function salvar(idEdicao) {
 
   const dados = {
     clienteId: clienteSelecionado.id,
-    modeloId: produtoSelecionado.id,
+    produtoId: produtoSelecionado.id,
     qtd: Number(document.getElementById("fQtd").value),
     prazo: document.getElementById("fPrazo").value,
     urgente: document.getElementById("fUrgente").checked,
