@@ -61,8 +61,15 @@ async function iniciarPortalCliente() {
 }
 
 function desenharPortal(cliente, pedidos) {
-  const listaHtml = pedidos.length
-    ? pedidos.map((p) => criarLinhaPedido(p)).join("")
+  // Em andamento primeiro (pelo prazo, como vem da API); concluídos no fim
+  const chaveFinal = etapasPortal[etapasPortal.length - 1]?.chave;
+  const ordenados = [
+    ...pedidos.filter((p) => p.coluna !== chaveFinal),
+    ...pedidos.filter((p) => p.coluna === chaveFinal),
+  ];
+
+  const listaHtml = ordenados.length
+    ? ordenados.map((p) => criarLinhaPedido(p)).join("")
     : `<div class="sy-card" style="padding:24px;text-align:center;color:var(--sy-ink-soft);">Nenhum pedido encontrado para esse cliente.</div>`;
 
   document.getElementById("conteudo").innerHTML = `

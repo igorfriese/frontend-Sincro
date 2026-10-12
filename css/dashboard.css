@@ -137,6 +137,13 @@
 .db-attention-row:last-child {
   border-bottom: none;
 }
+.db-attention-link {
+  cursor: pointer;
+  border-radius: 8px;
+}
+.db-attention-link:hover {
+  background: var(--sy-bg);
+}
 .db-attention-op {
   font-family: var(--sy-font-mono);
   font-size: 13px;
