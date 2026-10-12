@@ -29,6 +29,19 @@ function textoPrazo(prazoISO) {
   if (dias === 0) return "Vence hoje";
   return `${dias}d p/ prazo`;
 }
+// ---------- Segurança: texto vindo do banco dentro de HTML ----------
+// Todo nome/observação que entra num innerHTML passa por aqui. Sem isso,
+// um cliente cadastrado como <img src=x onerror=...> executaria script
+// na tela de quem abrisse — inclusive no portal público.
+function escaparHtml(valor) {
+  return String(valor ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function formatarDataCurta(iso) {
   const [ano, mes, dia] = iso.split("T")[0].split("-");
   return `${dia}/${mes}`;
@@ -286,10 +299,10 @@ function montarLayout({ itemAtivo, titulo, subtitulo }) {
         </div>
         <div class="sy-topbar-meta"><span class="sy-live-dot"></span><span>Operação conectada</span></div>
         <a class="sy-user-chip" href="meu-perfil.html">
-          <div class="sy-avatar">${iniciaisDoNome(usuario.nome)}</div>
+          <div class="sy-avatar">${escaparHtml(iniciaisDoNome(usuario.nome))}</div>
           <div class="sy-user-info">
-            <div class="sy-user-name">${usuario.nome}</div>
-            <div class="sy-user-role">${usuario.perfil}</div>
+            <div class="sy-user-name">${escaparHtml(usuario.nome)}</div>
+            <div class="sy-user-role">${escaparHtml(usuario.perfil)}</div>
           </div>
         </a>
       </header>

@@ -20,7 +20,7 @@ async function iniciarDashboard() {
     ]);
   } catch (erro) {
     document.getElementById("page-content").innerHTML =
-      `<div class="sy-erro-banner">Não foi possível carregar os dados: ${erro.message}</div>`;
+      `<div class="sy-erro-banner">Não foi possível carregar os dados: ${escaparHtml(erro.message)}</div>`;
     return;
   }
 
@@ -62,7 +62,7 @@ async function iniciarDashboard() {
   const legendaHtml = etapas
     .map(
       (e) => `
-    <div class="db-pipeline-legend-item"><div class="db-pipeline-swatch" style="background:${e.cor};"></div>${e.nome}</div>
+    <div class="db-pipeline-legend-item"><div class="db-pipeline-swatch" style="background:${e.cor};"></div>${escaparHtml(e.nome)}</div>
   `,
     )
     .join("");
@@ -87,8 +87,8 @@ async function iniciarDashboard() {
           return `
       <div class="db-attention-row">
         <span class="db-attention-op">#${p.id}</span>
-        <span class="db-attention-client">${p.urgente ? badgeUrgente() + " " : ""}${p.cliente}</span>
-        <span class="db-attention-motivo">${p.modelo} — ${textoPrazo(p.prazo)}</span>
+        <span class="db-attention-client">${p.urgente ? badgeUrgente() + " " : ""}${escaparHtml(p.cliente)}</span>
+        <span class="db-attention-motivo">${escaparHtml(p.modelo)} — ${textoPrazo(p.prazo)}</span>
         <span class="sy-badge ${badgeClasse}"><span class="sy-dot"></span>${badgeTexto}</span>
       </div>`;
         })

@@ -35,7 +35,7 @@ async function iniciarFormOrdem() {
     }
   } catch (erro) {
     document.getElementById("page-content").innerHTML =
-      `<div class="sy-erro-banner">${erro.message}</div>`;
+      `<div class="sy-erro-banner">${escaparHtml(erro.message)}</div>`;
     return;
   }
 
@@ -48,10 +48,10 @@ async function iniciarFormOrdem() {
 
   const campoResponsavel =
     usuarioAtualForm.perfil === "Vendedor"
-      ? `<input class="login-input" value="${usuarioAtualForm.nome} (você)" disabled style="opacity:.7;">`
+      ? `<input class="login-input" value="${escaparHtml(usuarioAtualForm.nome)} (você)" disabled style="opacity:.7;">`
       : `<select class="login-input" id="fResponsavel">
         <option value="">Selecione um responsável...</option>
-        ${usuariosDisponiveis.map((u) => `<option value="${u.id}" ${pedidoAtual?.responsavelId === u.id ? "selected" : ""}>${u.nome} (${u.role})</option>`).join("")}
+        ${usuariosDisponiveis.map((u) => `<option value="${u.id}" ${pedidoAtual?.responsavelId === u.id ? "selected" : ""}>${escaparHtml(u.nome)} (${escaparHtml(u.role)})</option>`).join("")}
       </select>`;
 
   document.getElementById("page-content").innerHTML = `
@@ -61,13 +61,13 @@ async function iniciarFormOrdem() {
 
       <label class="login-label">Cliente</label>
       <div class="ac-wrap">
-        <input class="login-input" id="fClienteBusca" placeholder="Digite o nome ou código do cliente..." autocomplete="off" value="${pedidoAtual?.cliente || ""}">
+        <input class="login-input" id="fClienteBusca" placeholder="Digite o nome ou código do cliente..." autocomplete="off" value="${escaparHtml(pedidoAtual?.cliente || "")}">
         <div class="ac-lista" id="fClienteLista" style="display:none;"></div>
       </div>
 
       <label class="login-label">Modelo / produto</label>
       <div class="ac-wrap">
-        <input class="login-input" id="fProdutoBusca" placeholder="Digite o nome ou código do produto..." autocomplete="off" value="${pedidoAtual?.modelo || ""}">
+        <input class="login-input" id="fProdutoBusca" placeholder="Digite o nome ou código do produto..." autocomplete="off" value="${escaparHtml(pedidoAtual?.modelo || "")}">
         <div class="ac-lista" id="fProdutoLista" style="display:none;"></div>
       </div>
 
@@ -154,8 +154,8 @@ function configurarAutocomplete({
         .map(
           (it) => `
         <div class="ac-item" data-id="${it.id}">
-          <span>${it.nome}</span>
-          <span class="ac-item-codigo">${it.codigo || ""}</span>
+          <span>${escaparHtml(it.nome)}</span>
+          <span class="ac-item-codigo">${escaparHtml(it.codigo || "")}</span>
         </div>`,
         )
         .join("");

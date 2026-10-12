@@ -15,7 +15,7 @@ async function iniciarHistorico() {
     etapas = await carregarEtapas();
   } catch (erro) {
     document.getElementById("page-content").innerHTML =
-      `<div class="sy-erro-banner">${erro.message}</div>`;
+      `<div class="sy-erro-banner">${escaparHtml(erro.message)}</div>`;
     return;
   }
 
@@ -47,10 +47,10 @@ async function iniciarHistorico() {
       <div class="al-item" onclick="window.location.href='timeline.html?id=${p.id}'">
         <div class="al-item-icone" style="background:${etapaFinalObj.cor}22;color:${etapaFinalObj.cor};">✓</div>
         <div class="al-item-info">
-          <div class="al-item-titulo">Pedido #${p.id} — ${p.cliente} ${p.urgente ? badgeUrgente() : ""}</div>
-          <div class="al-item-sub">${p.modelo} • ${p.qtd} un. • prazo: ${formatarDataCurta(p.prazo)}</div>
+          <div class="al-item-titulo">Pedido #${p.id} — ${escaparHtml(p.cliente)} ${p.urgente ? badgeUrgente() : ""}</div>
+          <div class="al-item-sub">${escaparHtml(p.modelo)} • ${p.qtd} un. • prazo: ${formatarDataCurta(p.prazo)}</div>
         </div>
-        <span class="sy-badge sy-badge-green"><span class="sy-dot"></span>${etapaFinalObj.nome}</span>
+        <span class="sy-badge sy-badge-green"><span class="sy-dot"></span>${escaparHtml(etapaFinalObj.nome)}</span>
       </div>
     `,
           )

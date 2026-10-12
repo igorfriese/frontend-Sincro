@@ -94,8 +94,8 @@ function renderizarTabela() {
   filtrados.forEach((p) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><span class="cl-chave">${p.codigo || "—"}</span></td>
-      <td><b>${p.nome}</b>${p.descricao ? `<div class="al-item-sub">${p.descricao}</div>` : ""}</td>
+      <td><span class="cl-chave">${escaparHtml(p.codigo || "—")}</span></td>
+      <td><b>${escaparHtml(p.nome)}</b>${p.descricao ? `<div class="al-item-sub">${escaparHtml(p.descricao)}</div>` : ""}</td>
       <td>R$ ${Number(p.precoBase).toFixed(2)}</td>
       <td>
         <div class="cd-acoes">

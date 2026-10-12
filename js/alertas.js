@@ -15,7 +15,7 @@ async function iniciarAlertas() {
     etapas = await carregarEtapas();
   } catch (erro) {
     document.getElementById("page-content").innerHTML =
-      `<div class="sy-erro-banner">${erro.message}</div>`;
+      `<div class="sy-erro-banner">${escaparHtml(erro.message)}</div>`;
     return;
   }
 
@@ -63,8 +63,8 @@ async function iniciarAlertas() {
         <div class="al-item" onclick="window.location.href='timeline.html?id=${p.id}'">
           <div class="al-item-icone" style="background:${bg};color:${cor};">${icone}</div>
           <div class="al-item-info">
-            <div class="al-item-titulo">${p.urgente ? badgeUrgente() + " " : ""}${titulo} — Pedido #${p.id} (${p.cliente})</div>
-            <div class="al-item-sub">${p.modelo} • ${textoPrazo(p.prazo)} • prazo: ${formatarDataCurta(p.prazo)}</div>
+            <div class="al-item-titulo">${p.urgente ? badgeUrgente() + " " : ""}${titulo} — Pedido #${p.id} (${escaparHtml(p.cliente)})</div>
+            <div class="al-item-sub">${escaparHtml(p.modelo)} • ${textoPrazo(p.prazo)} • prazo: ${formatarDataCurta(p.prazo)}</div>
           </div>
         </div>`;
           })

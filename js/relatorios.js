@@ -105,7 +105,7 @@ function renderizarRelatorio(relatorio) {
     .map(
       ([cliente, qtd]) => `
     <div class="rl-bar-row">
-      <div class="rl-bar-label">${cliente}</div>
+      <div class="rl-bar-label">${escaparHtml(cliente)}</div>
       <div class="rl-bar-track"><div class="rl-bar-fill" style="width:${(qtd / maiorValorCliente) * 100}%;"></div></div>
       <div class="rl-bar-valor">${qtd.toLocaleString("pt-BR")} un.</div>
     </div>
@@ -123,8 +123,8 @@ function renderizarRelatorio(relatorio) {
       return `
         <tr>
           <td><span class="cl-chave">#${p.id}</span></td>
-          <td><b>${p.cliente}</b></td>
-          <td>${p.modelo}</td>
+          <td><b>${escaparHtml(p.cliente)}</b></td>
+          <td>${escaparHtml(p.modelo)}</td>
           <td>${p.qtd}</td>
           <td>${formatarDataCurta(p.prazo)}</td>
           <td>${formatarDataCurta(p.concluidoEm)}</td>

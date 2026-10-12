@@ -9,16 +9,16 @@ async function iniciarMeuPerfil() {
   document.getElementById("page-content").innerHTML = `
     <div class="sy-card" style="max-width:440px;padding:24px;">
       <h2 class="sy-card-title" style="margin-bottom:4px;">Dados pessoais</h2>
-      <div class="al-item-sub" style="margin-bottom:16px;">Perfil de acesso: <b>${usuario.perfil}</b> (não pode ser alterado por aqui)</div>
+      <div class="al-item-sub" style="margin-bottom:16px;">Perfil de acesso: <b>${escaparHtml(usuario.perfil)}</b> (não pode ser alterado por aqui)</div>
 
       <div id="perfilErro" class="sy-erro-banner" style="display:none;"></div>
       <div id="perfilSucesso" class="sy-erro-banner" style="display:none;background:var(--sy-green-tint);color:var(--sy-green);"></div>
 
       <label class="login-label">Nome</label>
-      <input class="login-input" id="fNome" value="${usuario.nome}">
+      <input class="login-input" id="fNome" value="${escaparHtml(usuario.nome)}">
 
       <label class="login-label">E-mail</label>
-      <input class="login-input" id="fEmail" type="email" value="${usuario.email}">
+      <input class="login-input" id="fEmail" type="email" value="${escaparHtml(usuario.email)}">
 
       <hr style="border:none;border-top:1px solid var(--sy-line);margin:6px 0 16px;">
 
@@ -28,7 +28,7 @@ async function iniciarMeuPerfil() {
       <input class="login-input" id="fSenhaAtual" type="password" placeholder="Necessária só se for trocar a senha">
 
       <label class="login-label">Nova senha</label>
-      <input class="login-input" id="fSenhaNova" type="password">
+      <input class="login-input" id="fSenhaNova" type="password" placeholder="Mín. 6, com maiúscula, minúscula e número">
 
       <label class="login-label">Confirmar nova senha</label>
       <input class="login-input" id="fSenhaConfirma" type="password">
@@ -70,7 +70,7 @@ async function salvarPerfil(usuario) {
       return;
     }
     if (!senhaNova || senhaNova.length < 6) {
-      erroBox.textContent = "A nova senha precisa ter pelo menos 6 caracteres.";
+      erroBox.textContent = "A nova senha precisa ter pelo menos 6 caracteres, com maiúscula, minúscula e número.";
       erroBox.style.display = "block";
       return;
     }

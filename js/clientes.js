@@ -96,11 +96,11 @@ function renderizarTabela() {
       : null;
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><span class="cl-chave">${c.codigo || "—"}</span></td>
-      <td><b>${c.nome}</b></td>
-      <td>${c.documento || "—"}</td>
-      <td>${c.telefone || "—"}</td>
-      <td>${c.email || "—"}</td>
+      <td><span class="cl-chave">${escaparHtml(c.codigo || "—")}</span></td>
+      <td><b>${escaparHtml(c.nome)}</b></td>
+      <td>${escaparHtml(c.documento || "—")}</td>
+      <td>${escaparHtml(c.telefone || "—")}</td>
+      <td>${escaparHtml(c.email || "—")}</td>
       <td>
         <div class="cd-acoes">
           ${linkPublico ? `<button class="cd-btn-icone" data-acao="link" data-id="${c.id}" data-link="${linkPublico}">Copiar link</button>` : ""}

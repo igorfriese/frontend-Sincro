@@ -56,7 +56,7 @@ async function iniciarPortalCliente() {
     etapasPortal = await carregarEtapas();
     desenharPortal(cliente, pedidos);
   } catch (erro) {
-    conteudo.innerHTML = `<div class="sy-erro-banner">${erro.message}</div>`;
+    conteudo.innerHTML = `<div class="sy-erro-banner">${escaparHtml(erro.message)}</div>`;
   }
 }
 
@@ -68,7 +68,7 @@ function desenharPortal(cliente, pedidos) {
   document.getElementById("conteudo").innerHTML = `
     <div class="portal-caption">Acompanhamento em tempo real dos seus pedidos</div>
     <div class="sy-card" style="padding:18px 24px;margin-bottom:20px;">
-      <div class="tl-cliente" style="font-size:17px;">${cliente.nome}</div>
+      <div class="tl-cliente" style="font-size:17px;">${escaparHtml(cliente.nome)}</div>
       <div class="tl-modelo">${pedidos.length} pedido(s) no total</div>
     </div>
     <div id="portalLista">${listaHtml}</div>
@@ -96,10 +96,10 @@ function criarLinhaPedido(pedido) {
         <div style="width:10px;height:10px;border-radius:50%;background:${etapaInfo?.cor || "#5B4FC9"};flex-shrink:0;"></div>
         <div style="flex:1;min-width:0;">
           <div class="tl-cliente" style="font-size:14.5px;">
-            Pedido #${pedido.id} — ${pedido.modelo}
+            Pedido #${pedido.id} — ${escaparHtml(pedido.modelo)}
             ${pedido.urgente ? `<span style="margin-left:6px;">${badgeUrgente()}</span>` : ""}
           </div>
-          <div class="tl-modelo">${pedido.qtd} un. • ${etapaInfo?.nome || pedido.coluna}</div>
+          <div class="tl-modelo">${pedido.qtd} un. • ${escaparHtml(etapaInfo?.nome || pedido.coluna)}</div>
         </div>
         <span class="sy-badge ${badgeClasse}"><span class="sy-dot"></span>${textoPrazo(pedido.prazo)}</span>
         <span style="color:var(--sy-ink-soft);font-size:12px;">▾</span>
@@ -134,7 +134,7 @@ async function alternarPedido(pedido) {
         <div class="tl-step ${estado}">
           <div class="tl-step-line"></div>
           <div class="tl-step-dot">${icone}</div>
-          <div class="tl-step-nome">${etapa.nome}</div>
+          <div class="tl-step-nome">${escaparHtml(etapa.nome)}</div>
           <div class="tl-step-data">${eventoDaEtapa ? formatarDataCurta(eventoDaEtapa.dataHora) : ""}</div>
         </div>`;
       })

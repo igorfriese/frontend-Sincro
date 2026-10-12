@@ -12,7 +12,7 @@ async function iniciarMeusPedidos() {
     etapas = await carregarEtapas();
   } catch (erro) {
     document.getElementById("page-content").innerHTML =
-      `<div class="sy-erro-banner">${erro.message}</div>`;
+      `<div class="sy-erro-banner">${escaparHtml(erro.message)}</div>`;
     return;
   }
 
@@ -64,8 +64,8 @@ async function iniciarMeusPedidos() {
         <div class="al-item" onclick="window.location.href='timeline.html?id=${p.id}'">
           <div class="al-item-icone" style="background:${etapaInfo?.cor || "#5B4FC9"}22;color:${etapaInfo?.cor || "#5B4FC9"};">●</div>
           <div class="al-item-info">
-            <div class="al-item-titulo">${p.urgente ? badgeUrgente() + " " : ""}Pedido #${p.id} — ${p.cliente}</div>
-            <div class="al-item-sub">${p.modelo} • ${etapaInfo?.nome || p.coluna} • prazo: ${formatarDataCurta(p.prazo)}</div>
+            <div class="al-item-titulo">${p.urgente ? badgeUrgente() + " " : ""}Pedido #${p.id} — ${escaparHtml(p.cliente)}</div>
+            <div class="al-item-sub">${escaparHtml(p.modelo)} • ${escaparHtml(etapaInfo?.nome || p.coluna)} • prazo: ${formatarDataCurta(p.prazo)}</div>
           </div>
           <span class="sy-badge ${badgeClasse}"><span class="sy-dot"></span>${textoPrazo(p.prazo)}</span>
         </div>`;
