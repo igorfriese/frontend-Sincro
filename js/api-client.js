@@ -13,14 +13,20 @@ function usuarioLogado() {
   return dados ? JSON.parse(dados) : null;
 }
 
-function salvarSessao(token, usuario) {
+function refreshTokenSalvo() {
+  return sessionStorage.getItem("sincroRefreshToken");
+}
+
+function salvarSessao(token, usuario, refreshToken) {
   sessionStorage.setItem("sincroToken", token);
   sessionStorage.setItem("sincroUsuario", JSON.stringify(usuario));
+  if (refreshToken) sessionStorage.setItem("sincroRefreshToken", refreshToken);
 }
 
 function limparSessao() {
   sessionStorage.removeItem("sincroToken");
   sessionStorage.removeItem("sincroUsuario");
+  sessionStorage.removeItem("sincroRefreshToken");
 }
 
 // ===================================================================
@@ -29,7 +35,46 @@ function limparSessao() {
 
 const API_BASE_URL = "https://localhost:7206/api";
 
-async function apiRequest(endpoint, options = {}) {
+// ---------- Sessão: renovação automática do token ----------
+// O token de acesso dura pouco (1h). Quando a API responde 401, tenta
+// renovar com o refresh token (7 dias) e repete a requisição uma vez.
+// Se não der, a sessão acabou: volta pro login com aviso.
+let renovacaoEmAndamento = null;
+
+async function renovarToken() {
+  const refreshToken = refreshTokenSalvo();
+  if (!refreshToken) return false;
+
+  // Várias telas podem receber 401 ao mesmo tempo: só uma renova, as outras esperam
+  if (!renovacaoEmAndamento) {
+    renovacaoEmAndamento = (async () => {
+      try {
+        const resposta = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        });
+        if (!resposta.ok) return false;
+
+        const dados = await resposta.json();
+        salvarSessao(dados.token, dados.usuario, dados.refreshToken);
+        return true;
+      } catch {
+        return false;
+      } finally {
+        renovacaoEmAndamento = null;
+      }
+    })();
+  }
+  return await renovacaoEmAndamento;
+}
+
+function encerrarSessaoExpirada() {
+  limparSessao();
+  window.location.href = "login.html?sessao=expirada";
+}
+
+async function apiRequest(endpoint, options = {}, jaRenovou = false) {
   const resposta = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -38,6 +83,16 @@ async function apiRequest(endpoint, options = {}) {
       ...(options.headers || {}),
     },
   });
+
+  // 401 com sessão aberta = token vencido. No login (senha errada) e nas
+  // páginas públicas (sem token) o 401 segue como erro normal.
+  if (resposta.status === 401 && tokenSalvo() && endpoint !== "/auth/login") {
+    if (!jaRenovou && (await renovarToken())) {
+      return apiRequest(endpoint, options, true);
+    }
+    encerrarSessaoExpirada();
+    throw new Error("Sua sessão expirou. Entre novamente.");
+  }
 
   if (!resposta.ok) {
     let mensagem = `Erro HTTP ${resposta.status}`;
@@ -67,7 +122,7 @@ async function apiLogin(email, senha) {
     body: JSON.stringify({ email, senha }),
   });
 
-  salvarSessao(dados.token, dados.usuario);
+  salvarSessao(dados.token, dados.usuario, dados.refreshToken);
 
   return dados.usuario;
 }
