@@ -54,11 +54,14 @@ async function carregarRelatorio() {
   const dataDe = document.getElementById("rlDataDe").value;
   const dataAte = document.getElementById("rlDataAte").value;
 
-  let pedidos, eventos, etapas;
+  // A API devolve só os pedidos finalizados no período, já com a data
+  // de conclusão, a situação (no prazo/atrasado) e os totais calculados.
+  let relatorio, etapas;
   try {
-    pedidos = await apiListarPedidos();
-    eventos = await apiListar("eventos");
-    etapas = await carregarEtapas();
+    [relatorio, etapas] = await Promise.all([
+      apiRelatorioProducao(dataDe, dataAte),
+      apiListarEtapas(),
+    ]);
     erroBox.style.display = "none";
   } catch (erro) {
     erroBox.textContent = `Não foi possível carregar os dados: ${erro.message}`;
@@ -66,71 +69,27 @@ async function carregarRelatorio() {
     return;
   }
 
-  const etapaFinalObj = etapaFinal(etapas);
-  const etapaInicialObj = etapas[0];
-  etapaFinalNomeCache = etapaFinalObj?.nome || "";
+  const etapasOrdenadas = etapas.slice().sort((a, b) => a.ordem - b.ordem);
+  etapaFinalNomeCache = etapaFinal(etapasOrdenadas)?.nome || "";
 
-  // Pra cada pedido finalizado, acha a data em que ele CHEGOU na etapa
-  // final (evento mais recente com essa etapa) — é isso que define se
-  // ele entra no período filtrado e se foi pontual ou não.
-  const finalizadosComData = pedidos
-    .filter((p) => p.coluna === etapaFinalObj?.chave)
-    .map((p) => {
-      const eventosDoPedido = eventos.filter((e) => e.pedidoId === p.id);
-      const eventoConclusao = eventosDoPedido
-        .filter((e) => e.etapa === etapaFinalObj.chave)
-        .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))[0];
-      const eventoInicio = eventosDoPedido
-        .filter((e) => e.etapa === etapaInicialObj?.chave)
-        .sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora))[0];
-
-      return {
-        ...p,
-        concluidoEm: eventoConclusao?.dataHora || null,
-        iniciadoEm: eventoInicio?.dataHora || null,
-      };
-    })
-    .filter((p) => p.concluidoEm); // sem data de conclusão registrada, não entra no relatório
-
-  const filtrados = finalizadosComData.filter((p) => {
-    const dataConclusaoStr = p.concluidoEm.split("T")[0];
-    if (dataDe && dataConclusaoStr < dataDe) return false;
-    if (dataAte && dataConclusaoStr > dataAte) return false;
-    return true;
-  });
-
-  ultimoConjuntoFiltrado = filtrados;
-  renderizarRelatorio(filtrados);
+  ultimoConjuntoFiltrado = relatorio.pedidos;
+  renderizarRelatorio(relatorio);
 }
 
-function renderizarRelatorio(pedidos) {
+function renderizarRelatorio(relatorio) {
   const conteudo = document.getElementById("rlConteudo");
+  const pedidos = relatorio.pedidos;
 
   if (pedidos.length === 0) {
     conteudo.innerHTML = `<div class="sy-card rl-vazio">Nenhum pedido finalizado no período selecionado.</div>`;
     return;
   }
 
-  const totalProduzido = pedidos.reduce((s, p) => s + Number(p.qtd), 0);
-  const pontuais = pedidos.filter(
-    (p) => new Date(p.concluidoEm) <= new Date(p.prazo + "T23:59:59"),
-  );
-  const atrasados = pedidos.filter((p) => !pontuais.includes(p));
+  const totalProduzido = relatorio.totalPecas;
   const percentualPontualidade = Math.round(
-    (pontuais.length / pedidos.length) * 100,
+    (relatorio.pontuais / relatorio.totalPedidos) * 100,
   );
-
-  const comTempoDeProducao = pedidos.filter((p) => p.iniciadoEm);
-  const tempoMedioDias = comTempoDeProducao.length
-    ? Math.round(
-        comTempoDeProducao.reduce(
-          (s, p) => s + (new Date(p.concluidoEm) - new Date(p.iniciadoEm)),
-          0,
-        ) /
-          comTempoDeProducao.length /
-          86400000,
-      )
-    : null;
+  const tempoMedioDias = relatorio.tempoMedioDias;
 
   // Produção por cliente (top 6), pra o gráfico de barras
   const porCliente = {};
@@ -158,8 +117,7 @@ function renderizarRelatorio(pedidos) {
     .slice()
     .sort((a, b) => new Date(b.concluidoEm) - new Date(a.concluidoEm))
     .map((p) => {
-      const pontual = pontuais.includes(p);
-      const badge = pontual
+      const badge = p.pontual
         ? `<span class="sy-badge sy-badge-green"><span class="sy-dot"></span>No prazo</span>`
         : `<span class="sy-badge sy-badge-red"><span class="sy-dot"></span>Atrasado</span>`;
       return `
@@ -180,12 +138,12 @@ function renderizarRelatorio(pedidos) {
       <div class="sy-card rl-metric">
         <div class="rl-metric-label">Total produzido</div>
         <div class="rl-metric-value">${totalProduzido.toLocaleString("pt-BR")}<span style="font-size:14px;color:var(--sy-ink-soft);font-weight:500;"> peças</span></div>
-        <div class="rl-metric-sub">${pedidos.length} pedido(s) finalizado(s)</div>
+        <div class="rl-metric-sub">${relatorio.totalPedidos} pedido(s) finalizado(s)</div>
       </div>
       <div class="sy-card rl-metric">
         <div class="rl-metric-label">Pontualidade</div>
         <div class="rl-metric-value">${percentualPontualidade}%</div>
-        <div class="rl-metric-sub">${pontuais.length} no prazo · ${atrasados.length} atrasado(s)</div>
+        <div class="rl-metric-sub">${relatorio.pontuais} no prazo · ${relatorio.atrasados} atrasado(s)</div>
       </div>
       <div class="sy-card rl-metric">
         <div class="rl-metric-label">Tempo médio de produção</div>
@@ -194,7 +152,7 @@ function renderizarRelatorio(pedidos) {
       </div>
       <div class="sy-card rl-metric">
         <div class="rl-metric-label">Ticket médio</div>
-        <div class="rl-metric-value">${Math.round(totalProduzido / pedidos.length).toLocaleString("pt-BR")}<span style="font-size:14px;color:var(--sy-ink-soft);font-weight:500;"> un/pedido</span></div>
+        <div class="rl-metric-value">${Math.round(totalProduzido / relatorio.totalPedidos).toLocaleString("pt-BR")}<span style="font-size:14px;color:var(--sy-ink-soft);font-weight:500;"> un/pedido</span></div>
         <div class="rl-metric-sub">peças por ordem de produção</div>
       </div>
     </div>
@@ -230,7 +188,6 @@ function exportarCsv() {
     "Situacao",
   ];
   const linhas = ultimoConjuntoFiltrado.map((p) => {
-    const pontual = new Date(p.concluidoEm) <= new Date(p.prazo + "T23:59:59");
     return [
       p.id,
       p.cliente,
@@ -238,7 +195,7 @@ function exportarCsv() {
       p.qtd,
       p.prazo,
       p.concluidoEm.split("T")[0],
-      pontual ? "No prazo" : "Atrasado",
+      p.pontual ? "No prazo" : "Atrasado",
     ]
       .map((valor) => `"${String(valor).replace(/"/g, '""')}"`)
       .join(";");
