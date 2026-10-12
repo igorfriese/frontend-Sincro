@@ -76,6 +76,11 @@ function periodoDoMesAtual() {
   return { inicio: `${ano}-${mes}-01`, fim: `${ano}-${mes}-${dia}` };
 }
 
+// R$ 1.234,50 — sempre com centavos, no padrão brasileiro
+function formatarMoeda(valor) {
+  return Number(valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
 function formatarDataCurta(iso) {
   const [ano, mes, dia] = iso.split("T")[0].split("-");
   return `${dia}/${mes}`;
@@ -289,6 +294,7 @@ function montarLayout({ itemAtivo, titulo, subtitulo }) {
         '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
       box: '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
       user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+      logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/>',
       settings:
         '<path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="m19.4 15 .1.1 1.7 1.3-2 3.4-2-.8a8 8 0 0 1-2 1.1l-.3 2.1h-4l-.3-2.1a8 8 0 0 1-2-1.1l-2 .8-2-3.4 1.7-1.3.1-.1a8 8 0 0 1 0-2l-.1-.1-1.7-1.3 2-3.4 2 .8a8 8 0 0 1 2-1.1L11 5.8h4l.3 2.1a8 8 0 0 1 2 1.1l2-.8 2 3.4-1.7 1.3-.1.1a8 8 0 0 1 0 2Z"/>',
     };
@@ -316,7 +322,7 @@ function montarLayout({ itemAtivo, titulo, subtitulo }) {
       </div>
       <nav class="sy-sidebar-nav" aria-label="Navegação do sistema">${navHtml}</nav>
       <div class="sy-sidebar-footer">
-        <a class="sy-nav-item" href="#" onclick="sair(); return false;">${svgNav("history")}<span>Sair da conta</span></a>
+        <a class="sy-nav-item" href="#" onclick="sair(); return false;">${svgNav("logout")}<span>Sair da conta</span></a>
       </div>
     </aside>
     <div class="sy-main">

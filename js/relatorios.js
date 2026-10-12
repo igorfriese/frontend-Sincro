@@ -151,7 +151,7 @@ function renderizarRelatorio(relatorio) {
         <div class="rl-metric-sub">do início ao "${etapaFinalNomeCache || "final"}"</div>
       </div>
       <div class="sy-card rl-metric">
-        <div class="rl-metric-label">Ticket médio</div>
+        <div class="rl-metric-label">Média por pedido</div>
         <div class="rl-metric-value">${Math.round(totalProduzido / relatorio.totalPedidos).toLocaleString("pt-BR")}<span style="font-size:14px;color:var(--sy-ink-soft);font-weight:500;"> un/pedido</span></div>
         <div class="rl-metric-sub">peças por ordem de produção</div>
       </div>
