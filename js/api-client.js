@@ -95,7 +95,13 @@ async function apiRequest(endpoint, options = {}, jaRenovou = false) {
   }
 
   if (!resposta.ok) {
-    let mensagem = `Erro HTTP ${resposta.status}`;
+    // 403 por perfil e 404 de rota vêm da API sem corpo: mensagem padrão em português
+    const mensagensPadrao = {
+      403: "Seu perfil não tem permissão para fazer isso.",
+      404: "Não encontrado.",
+      500: "Erro interno do servidor. Tente novamente.",
+    };
+    let mensagem = mensagensPadrao[resposta.status] || `Erro HTTP ${resposta.status}`;
 
     try {
       const dados = await resposta.json();
@@ -148,12 +154,23 @@ async function apiListarPedidos() {
   }));
 }
 
+// A API devolve no máximo 100 itens por página: as telas querem a lista
+// inteira (tabela e autocomplete da ordem), então busca página por página
+async function listarTodasAsPaginas(rota, campo) {
+  const itens = [];
+  for (let pagina = 1; ; pagina++) {
+    const dados = await apiRequest(`${rota}?pagina=${pagina}&tamanho=100`);
+    const daPagina = dados[campo] || [];
+    itens.push(...daPagina);
+    if (daPagina.length === 0 || itens.length >= dados.total) return itens;
+  }
+}
+
 // ---------- Clientes ----------
 // Campos: id, codigo, nome, documento, telefone, email, endereco,
 // tokenAcompanhamento (null pro Vendedor — o link do portal é de Adm/Gestor)
 async function apiListarClientes() {
-  const dados = await apiRequest("/clientes?pagina=1&tamanho=100");
-  return dados.clientes || [];
+  return await listarTodasAsPaginas("/clientes", "clientes");
 }
 
 // Campo opcional em branco vai como null: "" não passa na validação
@@ -203,8 +220,7 @@ function produtoParaApi(produto) {
 }
 
 async function apiListarProdutos() {
-  const dados = await apiRequest("/produtos?pagina=1&tamanho=100");
-  return (dados.produtos || []).map(produtoDaApi);
+  return (await listarTodasAsPaginas("/produtos", "produtos")).map(produtoDaApi);
 }
 
 async function apiCriarProduto(produto) {
@@ -239,8 +255,7 @@ function usuarioDaApi(usuario) {
 }
 
 async function apiListarUsuarios() {
-  const dados = await apiRequest("/usuarios?pagina=1&tamanho=100");
-  return (dados.usuarios || []).map(usuarioDaApi);
+  return (await listarTodasAsPaginas("/usuarios", "usuarios")).map(usuarioDaApi);
 }
 
 async function apiCriarUsuario(usuario) {

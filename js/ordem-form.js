@@ -57,7 +57,7 @@ async function iniciarFormOrdem() {
 
   document.getElementById("page-content").innerHTML = `
     <div class="sy-card" style="max-width:480px;padding:24px;">
-      <h2 class="sy-card-title" style="margin-bottom:16px;">${idEdicao ? "Editar ordem #" + idEdicao : "Nova ordem de produção"}</h2>
+      <h2 class="sy-card-title" style="margin-bottom:16px;">${idEdicao ? "Editar ordem #" + escaparHtml(pedidoAtual.id) : "Nova ordem de produção"}</h2>
       <div id="formErro" class="sy-erro-banner" style="display:none;"></div>
 
       <label class="login-label">Cliente</label>

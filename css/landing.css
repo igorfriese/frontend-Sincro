@@ -744,6 +744,15 @@
   }
 }
 
+/* Até 1180px o hero ocupa a tela toda e os círculos de brilho passavam da
+   borda: no celular/tablet a página deslizava para o lado (o overflow-x do
+   body não segura no mobile). Cortar na borda do hero = cortar na da tela. */
+@media (max-width: 1180px) {
+  .ld-hero-glow {
+    overflow: hidden;
+  }
+}
+
 @media (max-width: 700px) {
   .ld-header {
     min-height: 64px;
