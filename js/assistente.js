@@ -159,7 +159,7 @@ async function responder(pergunta) {
       const total = calcularFaturamento(relatorio.pedidos, produtos);
       adicionarMensagem(
         "bot",
-        `O faturamento estimado do mês (pedidos concluídos até hoje) é R$ ${total.toLocaleString("pt-BR")}.`,
+        `O faturamento estimado do mês (pedidos concluídos até hoje) é ${formatarMoeda(total)}.`,
       );
     }
     return;

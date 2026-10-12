@@ -96,7 +96,7 @@ function renderizarTabela() {
     tr.innerHTML = `
       <td><span class="cl-chave">${escaparHtml(p.codigo || "—")}</span></td>
       <td><b>${escaparHtml(p.nome)}</b>${p.descricao ? `<div class="al-item-sub">${escaparHtml(p.descricao)}</div>` : ""}</td>
-      <td>R$ ${Number(p.precoBase).toFixed(2)}</td>
+      <td>${formatarMoeda(p.precoBase)}</td>
       <td>
         <div class="cd-acoes">
           ${podeEditarProdutos ? `<button class="cd-btn-icone" data-acao="editar" data-id="${p.id}">Editar</button>` : ""}

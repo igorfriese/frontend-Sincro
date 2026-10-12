@@ -96,7 +96,7 @@ async function iniciarDashboard() {
           const badgeClasse = sev === "red" ? "sy-badge-red" : "sy-badge-amber";
           const badgeTexto = sev === "red" ? "Atrasado" : "Atenção";
           return `
-      <div class="db-attention-row">
+      <div class="db-attention-row db-attention-link" onclick="window.location.href='timeline.html?id=${p.id}'">
         <span class="db-attention-op">#${p.id}</span>
         <span class="db-attention-client">${p.urgente ? badgeUrgente() + " " : ""}${escaparHtml(p.cliente)}</span>
         <span class="db-attention-motivo">${escaparHtml(p.modelo)} — ${textoPrazo(p.prazo)}</span>
@@ -128,7 +128,7 @@ async function iniciarDashboard() {
           ? `
       <div class="sy-card db-metric">
         <div class="db-metric-label">Faturamento do mês</div>
-        <div class="db-metric-value mono">R$ ${faturamentoDoMes.toLocaleString("pt-BR")}</div>
+        <div class="db-metric-value mono">${formatarMoeda(faturamentoDoMes)}</div>
         <div class="db-metric-foot"><span class="sy-badge sy-badge-green"><span class="sy-dot"></span>dado restrito ao ADM</span></div>
       </div>`
           : ""

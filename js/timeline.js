@@ -98,6 +98,7 @@ function desenharTimeline(pedido, eventos, etapas) {
       <div class="tl-header-info">
         <div class="tl-info-item"><div class="tl-info-label">Prazo</div><div class="tl-info-value">${formatarDataCurta(pedido.prazo)}</div></div>
         <div class="tl-info-item"><div class="tl-info-label">Situação</div><div class="tl-info-value">${badgeSituacao(pedido, etapas[etapas.length - 1]?.chave)}</div></div>
+        ${jaFinalizado ? "" : `<a class="kb-btn-new" href="ordem-form.html?id=${encodeURIComponent(pedido.id)}" style="text-decoration:none;">Editar pedido</a>`}
       </div>
     </div>
 
@@ -188,6 +189,17 @@ function desenharTimeline(pedido, eventos, etapas) {
         erroBox.textContent =
           "Escolha outra etapa ou escreva uma observação para registrar.";
         erroBox.style.display = "block";
+        return;
+      }
+
+      // Etapa final não tem volta: confirma, igual ao botão do Kanban
+      const etapaFinalObj = etapas[etapas.length - 1];
+      if (
+        novaEtapa === etapaFinalObj.chave &&
+        !confirm(
+          `Marcar o pedido #${pedido.id} como "${etapaFinalObj.nome}"? Depois disso ele não muda mais de etapa e sai do Kanban.`,
+        )
+      ) {
         return;
       }
 

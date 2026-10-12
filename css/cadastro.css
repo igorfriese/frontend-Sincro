@@ -31,6 +31,10 @@
 .cd-table tr:last-child td {
   border-bottom: none;
 }
+/* Código, CNPJ e telefone numa linha só (antes quebravam no meio) */
+.cd-table td.cd-nowrap {
+  white-space: nowrap;
+}
 .cd-table tr:hover td {
   background: var(--sy-bg);
 }
@@ -48,6 +52,7 @@
   font-size: 12px;
   cursor: pointer;
   font-family: var(--sy-font-body);
+  white-space: nowrap;
 }
 .cd-btn-icone:hover {
   background: var(--sy-bg);

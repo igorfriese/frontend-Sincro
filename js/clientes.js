@@ -24,7 +24,7 @@ async function iniciarClientes() {
     <div id="erroBox" class="sy-erro-banner" style="display:none;"></div>
     <div class="sy-card">
       <table class="cd-table">
-        <thead><tr><th>Código</th><th>Nome</th><th>Documento</th><th>Telefone</th><th>E-mail</th><th></th></tr></thead>
+        <thead><tr><th>Código</th><th>Nome</th><th>CNPJ</th><th>Telefone</th><th>E-mail</th><th></th></tr></thead>
         <tbody id="corpoTabela"></tbody>
       </table>
       <div id="vazio" class="cd-vazio" style="display:none;">Nenhum cliente encontrado.</div>
@@ -34,9 +34,9 @@ async function iniciarClientes() {
       <div class="sy-card cd-modal">
         <h2 class="sy-card-title" style="margin-bottom:14px;" id="modalTitulo">Novo cliente</h2>
         <input class="login-input" id="fNome" placeholder="Nome da confecção">
-        <input class="login-input" id="fDocumento" placeholder="CNPJ (14 dígitos)" data-only-numbers>
-        <input class="login-input" id="fTelefone" placeholder="Telefone" data-only-numbers>
-        <input class="login-input" id="fEmail" placeholder="E-mail" type="email">
+        <input class="login-input" id="fDocumento" placeholder="CNPJ (00.000.000/0000-00)" data-mascara="cnpj" inputmode="numeric">
+        <input class="login-input" id="fTelefone" placeholder="Telefone (opcional)" data-mascara="telefone" inputmode="tel">
+        <input class="login-input" id="fEmail" placeholder="E-mail (opcional)" type="email">
         <input class="login-input" id="fEndereco" placeholder="Endereço (opcional)">
         <div class="cd-modal-botoes">
           <button class="kb-btn-new cancelar" id="btnCancelar">Cancelar</button>
@@ -96,10 +96,10 @@ function renderizarTabela() {
       : null;
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><span class="cl-chave">${escaparHtml(c.codigo || "—")}</span></td>
+      <td class="cd-nowrap"><span class="cl-chave">${escaparHtml(c.codigo || "—")}</span></td>
       <td><b>${escaparHtml(c.nome)}</b></td>
-      <td>${escaparHtml(c.documento || "—")}</td>
-      <td>${escaparHtml(c.telefone || "—")}</td>
+      <td class="cd-nowrap">${escaparHtml(c.documento ? mascararCnpj(c.documento) : "—")}</td>
+      <td class="cd-nowrap">${escaparHtml(c.telefone ? mascararTelefone(c.telefone) : "—")}</td>
       <td>${escaparHtml(c.email || "—")}</td>
       <td>
         <div class="cd-acoes">
@@ -146,8 +146,8 @@ function abrirModal(id = null) {
     ? "Editar cliente"
     : "Novo cliente";
   document.getElementById("fNome").value = cliente?.nome || "";
-  document.getElementById("fDocumento").value = cliente?.documento || "";
-  document.getElementById("fTelefone").value = cliente?.telefone || "";
+  document.getElementById("fDocumento").value = mascararCnpj(cliente?.documento);
+  document.getElementById("fTelefone").value = mascararTelefone(cliente?.telefone);
   document.getElementById("fEmail").value = cliente?.email || "";
   document.getElementById("fEndereco").value = cliente?.endereco || "";
   document.getElementById("modalFundo").classList.add("aberto");
