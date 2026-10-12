@@ -67,7 +67,7 @@ function desenharTimeline(pedido, eventos, etapas) {
       <div class="tl-evento">
         <div class="tl-evento-dot" style="background:${etapaInfo ? etapaInfo.cor : "#5B4FC9"};"></div>
         <div><div class="tl-evento-etapa">${etapaInfo ? etapaInfo.nome : ev.etapa}</div>${ev.observacao ? `<div class="tl-evento-obs">${ev.observacao}</div>` : ""}</div>
-        <div class="tl-evento-data">${formatarDataHora(ev.dataHora)}</div>
+        <div class="tl-evento-data">${formatarDataHora(ev.dataHora)}${ev.registradoPorNome ? `<br>por ${ev.registradoPorNome}` : ""}</div>
       </div>`;
         })
         .join("")

@@ -107,6 +107,12 @@ async function apiListarUsuarios() {
   return dados.usuarios || [];
 }
 
+// Lista enxuta (id, nome, role) pra escolher o responsável de um pedido.
+// Liberada pra Administrador e Gestor (a /usuarios completa é só do Administrador).
+async function apiListarResponsaveis() {
+  return await apiRequest("/usuarios/responsaveis");
+}
+
 // Única forma de mudar a coluna de um pedido. O servidor valida a regra
 // do Kanban e registra o evento na timeline (com a observação, se houver)
 // — o front NÃO deve criar outro evento depois.
@@ -140,6 +146,15 @@ async function apiAtualizarEtapa(id, etapa) {
       cor: etapa.cor,
       ordem: etapa.ordem,
     }),
+  });
+}
+
+// Manda os ids de TODAS as etapas na nova ordem, numa chamada só.
+// A API recusa tirar a etapa final do fim enquanto houver pedidos nela.
+async function apiReordenarEtapas(idsNaNovaOrdem) {
+  return await apiRequest("/Etapas/reordenar", {
+    method: "PUT",
+    body: JSON.stringify({ ids: idsNaNovaOrdem.map(Number) }),
   });
 }
 
@@ -223,14 +238,14 @@ async function apiListarEventosDoPedido(pedidoId) {
 
   return eventos.sort((a, b) => new Date(a.dataHora) - new Date(b.dataHora));
 }
+// Anotação na timeline. A etapa é a atual do pedido e a data é a do
+// servidor — mudança de etapa é pelo apiAlterarEtapa.
 async function apiCriarEvento(evento) {
   return await apiRequest("/Eventos", {
     method: "POST",
     body: JSON.stringify({
-      pedidoId: evento.pedidoId,
-      etapa: evento.etapa,
+      pedidoId: Number(evento.pedidoId),
       observacao: evento.observacao || "",
-      dataHora: evento.dataHora || new Date().toISOString(),
     }),
   });
 }
