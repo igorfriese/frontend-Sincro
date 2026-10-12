@@ -24,7 +24,7 @@ async function iniciarFormOrdem() {
       apiListarProdutos(),
     ]);
     if (usuarioAtualForm.perfil !== "Vendedor")
-      usuariosDisponiveis = await apiListarUsuarios();
+      usuariosDisponiveis = await apiListarResponsaveis();
 
     if (idEdicao) {
       pedidoAtual = await apiBuscarPedido(idEdicao);

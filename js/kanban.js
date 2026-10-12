@@ -544,23 +544,12 @@ async function moverColuna(id, direcao) {
   const indiceVizinho = indice + direcao;
   if (indiceVizinho < 0 || indiceVizinho >= etapasCache.length) return;
 
-  const atual = etapasCache[indice];
-  const vizinho = etapasCache[indiceVizinho];
+  // Troca as duas de lugar e manda a ordem completa numa chamada só
+  const ids = etapasCache.map((e) => e.id);
+  [ids[indice], ids[indiceVizinho]] = [ids[indiceVizinho], ids[indice]];
 
   try {
-    await apiAtualizarEtapa(atual.id, {
-      chave: atual.chave,
-      nome: atual.nome,
-      cor: atual.cor,
-      ordem: vizinho.ordem,
-    });
-
-    await apiAtualizarEtapa(vizinho.id, {
-      chave: vizinho.chave,
-      nome: vizinho.nome,
-      cor: vizinho.cor,
-      ordem: atual.ordem,
-    });
+    await apiReordenarEtapas(ids);
 
     etapasCache = await apiListarEtapas();
     renderizarTabelaColunas();
