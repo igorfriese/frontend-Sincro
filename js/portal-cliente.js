@@ -81,13 +81,18 @@ function desenharPortal(cliente, pedidos) {
 }
 
 function criarLinhaPedido(pedido) {
-  const sev = severidadePrazo(pedido);
+  // Pedido na última etapa já foi entregue: mostra "Concluído", não o atraso do prazo
+  const concluido =
+    etapasPortal.length > 0 &&
+    pedido.coluna === etapasPortal[etapasPortal.length - 1].chave;
+  const sev = concluido ? "ok" : severidadePrazo(pedido);
   const badgeClasse =
     sev === "red"
       ? "sy-badge-red"
       : sev === "amber"
         ? "sy-badge-amber"
         : "sy-badge-green";
+  const textoSituacao = concluido ? "Concluído" : textoPrazo(pedido.prazo);
   const etapaInfo = etapasPortal.find((e) => e.chave === pedido.coluna);
 
   return `
@@ -101,7 +106,7 @@ function criarLinhaPedido(pedido) {
           </div>
           <div class="tl-modelo">${pedido.qtd} un. • ${escaparHtml(etapaInfo?.nome || pedido.coluna)}</div>
         </div>
-        <span class="sy-badge ${badgeClasse}"><span class="sy-dot"></span>${textoPrazo(pedido.prazo)}</span>
+        <span class="sy-badge ${badgeClasse}"><span class="sy-dot"></span>${textoSituacao}</span>
         <span style="color:var(--sy-ink-soft);font-size:12px;">▾</span>
       </div>
       <div id="portalDetalhe-${pedido.id}" style="display:none;padding:0 20px 20px;"></div>
