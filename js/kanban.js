@@ -191,7 +191,7 @@ function renderizarBoard() {
     coluna.className = "kb-column";
     coluna.style.setProperty("--kb-accent", etapa.cor);
     coluna.innerHTML = `
-      <div class="kb-column-head"><span class="kb-column-dot"></span><span class="kb-column-name">${etapa.nome}</span><span class="kb-column-count">${doPedidos.length}</span></div>
+      <div class="kb-column-head"><span class="kb-column-dot"></span><span class="kb-column-name">${escaparHtml(etapa.nome)}</span><span class="kb-column-count">${doPedidos.length}</span></div>
       <div class="kb-column-body"></div>`;
     const corpo = coluna.querySelector(".kb-column-body");
 
@@ -268,10 +268,10 @@ function criarCard(pedido, cor) {
       <span class="sy-badge ${badgeClasse}"><span class="sy-dot"></span>${textoPrazo(pedido.prazo)}</span>
     </div>
     ${pedido.urgente ? `<div style="margin-bottom:6px;">${badgeUrgente()}</div>` : ""}
-    <div class="kb-card-client">${pedido.cliente}</div>
-    <div class="kb-card-model">${pedido.modelo}</div>
+    <div class="kb-card-client">${escaparHtml(pedido.cliente)}</div>
+    <div class="kb-card-model">${escaparHtml(pedido.modelo)}</div>
     <div class="kb-card-foot"><span class="kb-card-qty">${pedido.qtd} un.</span><span class="kb-card-qty">${formatarDataCurta(pedido.prazo)}</span></div>
-    ${podeFinalizar ? `<button class="cd-btn-icone" data-acao-finalizar="${pedido.id}" style="width:100%;margin-top:8px;">Marcar como "${etapaUltima.nome}" →</button>` : ""}
+    ${podeFinalizar ? `<button class="cd-btn-icone" data-acao-finalizar="${pedido.id}" style="width:100%;margin-top:8px;">Marcar como "${escaparHtml(etapaUltima.nome)}" →</button>` : ""}
     ${usuarioAtualKanban.perfil === "Administrador" ? `<button class="cd-btn-icone excluir" data-acao-excluir="${pedido.id}" style="width:100%;margin-top:8px;">Excluir Pedido</button>` : ""}`;
 
   card.addEventListener(
@@ -368,7 +368,7 @@ function renderizarTabelaColunas() {
         </div>
       </td>
       <td><span class="cl-swatch" style="background:${etapa.cor};"></span></td>
-      <td><b>${etapa.nome}</b></td>
+      <td><b>${escaparHtml(etapa.nome)}</b></td>
       <td>${qtdPedidos}</td>
       <td>
         <div class="cd-acoes">

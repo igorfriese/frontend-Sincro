@@ -26,7 +26,7 @@ async function iniciarTimeline() {
     desenharTimeline(pedido, eventos, etapas);
   } catch (erro) {
     document.getElementById("page-content").innerHTML =
-      `<div class="sy-erro-banner">${erro.message}</div>`;
+      `<div class="sy-erro-banner">${escaparHtml(erro.message)}</div>`;
   }
 }
 
@@ -51,7 +51,7 @@ function desenharTimeline(pedido, eventos, etapas) {
       <div class="tl-step ${estado}">
         <div class="tl-step-line"></div>
         <div class="tl-step-dot">${icone}</div>
-        <div class="tl-step-nome">${etapa.nome}</div>
+        <div class="tl-step-nome">${escaparHtml(etapa.nome)}</div>
         <div class="tl-step-data">${eventoDaEtapa ? formatarDataCurta(eventoDaEtapa.dataHora) : ""}</div>
       </div>`;
     })
@@ -66,8 +66,8 @@ function desenharTimeline(pedido, eventos, etapas) {
           return `
       <div class="tl-evento">
         <div class="tl-evento-dot" style="background:${etapaInfo ? etapaInfo.cor : "#5B4FC9"};"></div>
-        <div><div class="tl-evento-etapa">${etapaInfo ? etapaInfo.nome : ev.etapa}</div>${ev.observacao ? `<div class="tl-evento-obs">${ev.observacao}</div>` : ""}</div>
-        <div class="tl-evento-data">${formatarDataHora(ev.dataHora)}${ev.registradoPorNome ? `<br>por ${ev.registradoPorNome}` : ""}</div>
+        <div><div class="tl-evento-etapa">${escaparHtml(etapaInfo ? etapaInfo.nome : ev.etapa)}</div>${ev.observacao ? `<div class="tl-evento-obs">${escaparHtml(ev.observacao)}</div>` : ""}</div>
+        <div class="tl-evento-data">${formatarDataHora(ev.dataHora)}${ev.registradoPorNome ? `<br>por ${escaparHtml(ev.registradoPorNome)}` : ""}</div>
       </div>`;
         })
         .join("")
@@ -81,7 +81,7 @@ function desenharTimeline(pedido, eventos, etapas) {
   const opcoesEtapaHtml = etapas
     .map(
       (e) =>
-        `<option value="${e.chave}" ${e.chave === pedido.coluna ? "selected" : ""}>${e.nome}</option>`,
+        `<option value="${e.chave}" ${e.chave === pedido.coluna ? "selected" : ""}>${escaparHtml(e.nome)}</option>`,
     )
     .join("");
 
@@ -98,8 +98,8 @@ function desenharTimeline(pedido, eventos, etapas) {
           Pedido #${pedido.id}
           ${pedido.urgente ? `<span style="margin-left:8px;">${badgeUrgente()}</span>` : ""}
         </div>
-        <div class="tl-cliente">${pedido.cliente}</div>
-        <div class="tl-modelo">${pedido.modelo} — ${pedido.qtd} un.</div>
+        <div class="tl-cliente">${escaparHtml(pedido.cliente)}</div>
+        <div class="tl-modelo">${escaparHtml(pedido.modelo)} — ${pedido.qtd} un.</div>
       </div>
       <div class="tl-header-info">
         <div class="tl-info-item"><div class="tl-info-label">Prazo</div><div class="tl-info-value">${formatarDataCurta(pedido.prazo)}</div></div>
@@ -123,7 +123,7 @@ function desenharTimeline(pedido, eventos, etapas) {
       jaFinalizado
         ? `
     <div class="sy-card" style="margin-top:20px;padding:18px 20px;background:var(--sy-bg);">
-      <p style="margin:0;font-size:13.5px;color:var(--sy-ink-soft);">Este pedido já está em <b>"${etapas[idxAtualEtapa].nome}"</b> — não pode mais mudar de etapa. Ele saiu do Kanban e fica registrado permanentemente no <a class="sy-card-link" href="historico.html">Histórico</a>.</p>
+      <p style="margin:0;font-size:13.5px;color:var(--sy-ink-soft);">Este pedido já está em <b>"${escaparHtml(etapas[idxAtualEtapa].nome)}"</b> — não pode mais mudar de etapa. Ele saiu do Kanban e fica registrado permanentemente no <a class="sy-card-link" href="historico.html">Histórico</a>.</p>
     </div>`
         : `
     <div class="sy-card" style="margin-top:20px;padding:18px 20px;">

@@ -35,7 +35,7 @@ async function iniciarUsuarios() {
         <h2 class="sy-card-title" style="margin-bottom:14px;" id="modalTitulo">Novo usuário</h2>
         <input class="login-input" id="fNome" placeholder="Nome completo">
         <input class="login-input" id="fEmail" placeholder="E-mail" type="email">
-        <input class="login-input" id="fSenha" placeholder="Senha inicial" type="password">
+        <input class="login-input" id="fSenha" placeholder="Senha inicial (mín. 6, com maiúscula, minúscula e número)" type="password">
         <select class="login-input" id="fPerfil">
           <option value="Administrador">Administrador</option>
           <option value="Gestor">Gestor</option>
@@ -96,9 +96,9 @@ function renderizarTabela() {
   filtrados.forEach((u) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><b>${u.nome}</b>${u.id === usuarioAtualUsuarios.id ? ' <span class="al-item-sub">(você)</span>' : ""}</td>
-      <td>${u.email}</td>
-      <td><span class="sy-badge sy-badge-blue">${u.perfil}</span></td>
+      <td><b>${escaparHtml(u.nome)}</b>${u.id === usuarioAtualUsuarios.id ? ' <span class="al-item-sub">(você)</span>' : ""}</td>
+      <td>${escaparHtml(u.email)}</td>
+      <td><span class="sy-badge sy-badge-blue">${escaparHtml(u.perfil)}</span></td>
       <td>
         <div class="cd-acoes">
           <button class="cd-btn-icone" data-acao="editar" data-id="${u.id}">Editar</button>
@@ -132,7 +132,7 @@ function abrirModal(id = null) {
   document.getElementById("fSenha").value = "";
   document.getElementById("fSenha").placeholder = id
     ? "Nova senha (deixa em branco pra manter a atual)"
-    : "Senha inicial";
+    : "Senha inicial (mín. 6, com maiúscula, minúscula e número)";
   document.getElementById("fPerfil").value = registro?.perfil || "Vendedor";
   document.getElementById("modalFundo").classList.add("aberto");
 }
