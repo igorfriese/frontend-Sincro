@@ -147,19 +147,147 @@ async function apiListarPedidos() {
   }));
 }
 
+// ---------- Clientes ----------
+// Campos: id, codigo, nome, documento, telefone, email, endereco,
+// tokenAcompanhamento (null pro Vendedor — o link do portal é de Adm/Gestor)
 async function apiListarClientes() {
-  const dados = await apiRequest("/clientes?pagina=1&tamanho=1000");
+  const dados = await apiRequest("/clientes?pagina=1&tamanho=100");
   return dados.clientes || [];
 }
 
+// Campo opcional em branco vai como null: "" não passa na validação
+// de email/telefone da API ("Email inválido" num campo que nem foi preenchido)
+function clienteParaApi(cliente) {
+  const opcional = (valor) => (valor && valor.trim() ? valor.trim() : null);
+  return {
+    nome: cliente.nome,
+    documento: cliente.documento,
+    telefone: opcional(cliente.telefone),
+    email: opcional(cliente.email),
+    endereco: opcional(cliente.endereco),
+  };
+}
+
+async function apiCriarCliente(cliente) {
+  return await apiRequest("/clientes", {
+    method: "POST",
+    body: JSON.stringify(clienteParaApi(cliente)),
+  });
+}
+
+async function apiAtualizarCliente(id, cliente) {
+  return await apiRequest(`/clientes/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(clienteParaApi(cliente)),
+  });
+}
+
+async function apiExcluirCliente(id) {
+  return await apiRequest(`/clientes/${id}`, { method: "DELETE" });
+}
+
+// ---------- Produtos ----------
+// A API chama o preço de "preco"; as telas usam "precoBase".
+function produtoDaApi(produto) {
+  return { ...produto, precoBase: produto.preco };
+}
+
+function produtoParaApi(produto) {
+  return {
+    nome: produto.nome,
+    descricao: produto.descricao || null,
+    preco: Number(produto.precoBase),
+    estoque: Number(produto.estoque) || 0,
+  };
+}
+
 async function apiListarProdutos() {
-  const dados = await apiRequest("/produtos?pagina=1&tamanho=1000");
-  return dados.produtos || [];
+  const dados = await apiRequest("/produtos?pagina=1&tamanho=100");
+  return (dados.produtos || []).map(produtoDaApi);
+}
+
+async function apiCriarProduto(produto) {
+  const criado = await apiRequest("/produtos", {
+    method: "POST",
+    body: JSON.stringify(produtoParaApi(produto)),
+  });
+  return produtoDaApi(criado);
+}
+
+async function apiAtualizarProduto(id, produto) {
+  const atualizado = await apiRequest(`/produtos/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(produtoParaApi(produto)),
+  });
+  return produtoDaApi(atualizado);
+}
+
+async function apiExcluirProduto(id) {
+  return await apiRequest(`/produtos/${id}`, { method: "DELETE" });
+}
+
+// ---------- Usuários (Administrador) ----------
+// A API chama o perfil de "role"; as telas e a sessão usam "perfil".
+function usuarioDaApi(usuario) {
+  return {
+    id: usuario.id,
+    nome: usuario.nome,
+    email: usuario.email,
+    perfil: usuario.role,
+  };
 }
 
 async function apiListarUsuarios() {
-  const dados = await apiRequest("/usuarios?pagina=1&tamanho=1000");
-  return dados.usuarios || [];
+  const dados = await apiRequest("/usuarios?pagina=1&tamanho=100");
+  return (dados.usuarios || []).map(usuarioDaApi);
+}
+
+async function apiCriarUsuario(usuario) {
+  const criado = await apiRequest("/usuarios", {
+    method: "POST",
+    body: JSON.stringify({
+      nome: usuario.nome,
+      email: usuario.email,
+      senha: usuario.senha,
+      role: usuario.perfil,
+    }),
+  });
+  return usuarioDaApi(criado);
+}
+
+// senha vazia/ausente mantém a senha atual
+async function apiAtualizarUsuario(id, usuario) {
+  const atualizado = await apiRequest(`/usuarios/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      nome: usuario.nome,
+      email: usuario.email,
+      role: usuario.perfil,
+      novaSenha: usuario.senha || null,
+    }),
+  });
+  return usuarioDaApi(atualizado);
+}
+
+async function apiExcluirUsuario(id) {
+  return await apiRequest(`/usuarios/${id}`, { method: "DELETE" });
+}
+
+// ---------- Meu Perfil (usuário logado) ----------
+async function apiAtualizarMeuPerfil(dados) {
+  const perfil = await apiRequest("/usuarios/me", {
+    method: "PUT",
+    body: JSON.stringify({ nome: dados.nome, email: dados.email }),
+  });
+  return usuarioDaApi(perfil);
+}
+
+// A API confere a senha atual (nada de senha guardada no navegador)
+async function apiAlterarMinhaSenha(senhaAtual, novaSenha) {
+  return await apiRequest("/usuarios/me/senha", {
+    method: "PUT",
+    body: JSON.stringify({ senhaAnterior: senhaAtual, novaSenha }),
+  });
 }
 
 // Lista enxuta (id, nome, role) pra escolher o responsável de um pedido.
@@ -219,13 +347,6 @@ async function apiExcluirEtapa(id) {
   });
 }
 
-// Sem o filtro por perfil — usado só pra checagens de integridade
-// referencial (ex: "esse cliente tem pedidos de QUALQUER responsável
-// antes de excluir?"), onde a resposta não pode depender de quem
-// está logado.
-async function apiListarTodosPedidos() {
-  return await apiRequest("/Pedidos");
-}
 async function apiBuscarPedido(id) {
   const pedido = await apiRequest(`/Pedidos/${id}`);
 
@@ -303,45 +424,6 @@ async function apiCriarEvento(evento) {
       observacao: evento.observacao || "",
     }),
   });
-}
-
-// ---------- CRUD genérico — usado por Clientes, Produtos e Usuários ----------
-async function apiListar(colecao) {
-  const db = carregarBanco();
-  return db[colecao] || [];
-}
-async function apiCriarItem(colecao, dados) {
-  const db = carregarBanco();
-  if (!db[colecao]) db[colecao] = [];
-
-  const novo = { ...dados, id: proximoIdDe(db[colecao]) };
-
-  if (colecao === "clientes") {
-    novo.codigo = novo.codigo || proximoCodigo(db.clientes, "CLI");
-    novo.tokenAcompanhamento =
-      novo.tokenAcompanhamento || gerarTokenAleatorio("cli");
-  }
-  if (colecao === "produtos") {
-    novo.codigo = novo.codigo || proximoCodigo(db.produtos, "PRD");
-  }
-
-  db[colecao].push(novo);
-  salvarBanco(db);
-  return novo;
-}
-async function apiAtualizarItem(colecao, id, dados) {
-  const db = carregarBanco();
-  const item = (db[colecao] || []).find((i) => i.id === id);
-  if (!item) throw new Error("Registro não encontrado");
-  Object.assign(item, dados);
-  salvarBanco(db);
-  return item;
-}
-async function apiExcluirItem(colecao, id) {
-  const db = carregarBanco();
-  db[colecao] = (db[colecao] || []).filter((i) => i.id !== id);
-  salvarBanco(db);
-  return { deletado: true };
 }
 
 // ---------- Relatórios (Administrador e Gestor) ----------

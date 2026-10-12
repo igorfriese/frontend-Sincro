@@ -16,7 +16,7 @@ async function iniciarDashboard() {
     [pedidos, etapas, produtos] = await Promise.all([
       apiListarPedidos(),
       carregarEtapas(),
-      apiListar("produtos"),
+      apiListarProdutos(),
     ]);
   } catch (erro) {
     document.getElementById("page-content").innerHTML =

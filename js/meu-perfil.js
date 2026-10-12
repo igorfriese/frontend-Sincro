@@ -60,15 +60,12 @@ async function salvarPerfil(usuario) {
     return;
   }
 
-  const dadosAtualizados = { nome, email };
   const querTrocarSenha = senhaAtual || senhaNova || senhaConfirma;
 
+  // A senha atual é conferida pela API; aqui só o que dá pra checar antes
   if (querTrocarSenha) {
-    const usuarios = await apiListar("usuarios");
-    const registroCompleto = usuarios.find((u) => u.id === usuario.id);
-
-    if (!senhaAtual || registroCompleto.senha !== senhaAtual) {
-      erroBox.textContent = "Senha atual incorreta.";
+    if (!senhaAtual) {
+      erroBox.textContent = "Informe a senha atual para trocar a senha.";
       erroBox.style.display = "block";
       return;
     }
@@ -82,7 +79,6 @@ async function salvarPerfil(usuario) {
       erroBox.style.display = "block";
       return;
     }
-    dadosAtualizados.senha = senhaNova;
   }
 
   const botao = document.getElementById("btnSalvar");
@@ -90,14 +86,12 @@ async function salvarPerfil(usuario) {
   botao.textContent = "Salvando...";
 
   try {
-    const atualizado = await apiAtualizarItem(
-      "usuarios",
-      usuario.id,
-      dadosAtualizados,
-    );
+    // Senha primeiro: se a senha atual estiver errada, nada é alterado
+    if (querTrocarSenha) {
+      await apiAlterarMinhaSenha(senhaAtual, senhaNova);
+    }
 
-    const atualizadoPublico = { ...atualizado };
-    delete atualizadoPublico.senha;
+    const atualizadoPublico = await apiAtualizarMeuPerfil({ nome, email });
     salvarSessao(tokenSalvo(), atualizadoPublico);
 
     sucessoBox.textContent = "Perfil atualizado com sucesso!";
