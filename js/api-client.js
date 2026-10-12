@@ -75,9 +75,8 @@ async function apiLogin(email, senha) {
 // ---------- Pedidos ----------
 // Regra de perfil: Administrador e Gestor veem todos os pedidos;
 // Vendedor só vê os que estão sob a própria responsabilidade
-// (responsavelId). Central aqui pra valer em toda tela que lista
-// pedidos (Kanban, Alertas, Histórico, Dashboard, Assistente) sem
-// cada uma precisar reimplementar o filtro.
+// (responsavelId). O filtro é feito pela API, então vale em toda tela
+// que lista pedidos (Kanban, Alertas, Histórico, Dashboard, Assistente).
 async function apiListarPedidos() {
   const pedidos = await apiRequest("/Pedidos");
 
@@ -108,10 +107,13 @@ async function apiListarUsuarios() {
   return dados.usuarios || [];
 }
 
-async function apiAlterarEtapa(id, novaEtapa) {
+// Única forma de mudar a coluna de um pedido. O servidor valida a regra
+// do Kanban e registra o evento na timeline (com a observação, se houver)
+// — o front NÃO deve criar outro evento depois.
+async function apiAlterarEtapa(id, novaEtapa, observacao = "") {
   return await apiRequest(`/Pedidos/${id}/etapa`, {
     method: "PUT",
-    body: JSON.stringify(novaEtapa),
+    body: JSON.stringify({ etapa: novaEtapa, observacao }),
   });
 }
 
@@ -200,7 +202,7 @@ async function apiAtualizarPedido(id, campos) {
     quantidade: campos.qtd ?? campos.quantidade ?? atual.quantidade,
     prazo: campos.prazo ? `${campos.prazo}T00:00:00` : atual.prazo,
     urgente: campos.urgente !== undefined ? campos.urgente : atual.urgente,
-    coluna: campos.coluna ?? atual.coluna,
+    // coluna não vai aqui: mudança de etapa é só pelo apiAlterarEtapa
   };
 
   return await apiRequest(`/Pedidos/${id}`, {
