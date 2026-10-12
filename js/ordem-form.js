@@ -4,7 +4,7 @@ let usuariosDisponiveis = [];
 let clienteSelecionado = null;
 let produtoSelecionado = null;
 let usuarioAtualForm = null;
-let pedidoAtualColuna = "corte";
+let pedidoAtualColuna = null; // pedido novo: o servidor coloca na primeira etapa
 
 async function iniciarFormOrdem() {
   usuarioAtualForm = montarLayout({
@@ -39,11 +39,12 @@ async function iniciarFormOrdem() {
     return;
   }
 
+  // Pelo id, não pelo nome: dois clientes podem ter o mesmo nome
   clienteSelecionado = pedidoAtual
-    ? clientesDisponiveis.find((c) => c.nome === pedidoAtual.cliente) || null
+    ? clientesDisponiveis.find((c) => String(c.id) === String(pedidoAtual.clienteId)) || null
     : null;
   produtoSelecionado = pedidoAtual
-    ? produtosDisponiveis.find((p) => p.nome === pedidoAtual.modelo) || null
+    ? produtosDisponiveis.find((p) => String(p.id) === String(pedidoAtual.produtoId)) || null
     : null;
 
   const campoResponsavel =

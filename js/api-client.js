@@ -353,6 +353,8 @@ async function apiBuscarPedido(id) {
 
   return {
     id: String(pedido.id),
+    clienteId: pedido.clienteId,
+    produtoId: pedido.produtoId,
     cliente: pedido.cliente?.nome || `Cliente #${pedido.clienteId}`,
     modelo: pedido.produto?.nome || `Produto #${pedido.produtoId}`,
     qtd: pedido.quantidade,
@@ -361,6 +363,7 @@ async function apiBuscarPedido(id) {
     urgente: pedido.urgente,
     coluna: pedido.coluna,
     ultimaMovimentacao: pedido.ultimaMovimentacao || null,
+    // null para o Vendedor (o link do portal é de Administrador/Gestor)
     clienteTokenAcompanhamento: pedido.cliente?.tokenAcompanhamento || null,
   };
 }
@@ -373,7 +376,8 @@ async function apiCriarPedido(pedido) {
     quantidade: Number(pedido.qtd),
     prazo: `${pedido.prazo}T00:00:00`,
     urgente: !!pedido.urgente,
-    coluna: pedido.coluna || "corte",
+    // Sem coluna, o servidor usa a primeira etapa (o Administrador pode ter mudado as colunas)
+    coluna: pedido.coluna || null,
   };
 
   return await apiRequest("/Pedidos", {

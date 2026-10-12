@@ -104,15 +104,12 @@ function badgeUrgente() {
   return `<span class="badge-urgente">${svgUrgente(11)}Urgente</span>`;
 }
 
-// ---------- Fluxo obrigatório do Kanban ----------
-// Regra: as DUAS ÚLTIMAS etapas do pipeline (por ordem, sejam quais
-// forem os nomes) funcionam como "Entregue" → "Finalizado":
-//   - só chega na última etapa vindo da penúltima
-//   - da penúltima só se avança pra última (nunca volta)
-//   - a última etapa "sai" do Kanban — só aparece no Histórico
-//   - não dá pra pular etapas no meio do caminho
-// Isso vale tanto pro drag-and-drop do Kanban quanto pro formulário
-// de "Registrar novo evento" da Timeline.
+// ---------- Regra de movimentação do Kanban ----------
+// Mesma regra do servidor (EtapaService.ValidarTransicao): mover entre
+// colunas é livre, em qualquer ordem; só a última etapa é terminal —
+// o pedido sai do Kanban e fica no Histórico. Vale pro drag-and-drop do
+// Kanban e pro "Registrar novo evento" da Timeline. Aqui é só pra avisar
+// antes da viagem: quem decide é a API.
 function validarTransicaoEtapa(etapasOrdenadas, chaveAtual, chaveDestino) {
   if (chaveAtual === chaveDestino) return { permitido: true };
 

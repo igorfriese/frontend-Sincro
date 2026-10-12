@@ -36,7 +36,7 @@ async function iniciarClientes() {
         <input class="login-input" id="fNome" placeholder="Nome da confecção">
         <input class="login-input" id="fDocumento" placeholder="CNPJ (14 dígitos)" data-only-numbers>
         <input class="login-input" id="fTelefone" placeholder="Telefone" data-only-numbers>
-        <input class="login-input" id="fEmail" placeholder="E-mail" type="email" data-no-numbers>
+        <input class="login-input" id="fEmail" placeholder="E-mail" type="email">
         <input class="login-input" id="fEndereco" placeholder="Endereço (opcional)">
         <div class="cd-modal-botoes">
           <button class="kb-btn-new cancelar" id="btnCancelar">Cancelar</button>
