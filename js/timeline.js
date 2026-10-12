@@ -31,13 +31,6 @@ async function iniciarTimeline() {
 }
 
 function desenharTimeline(pedido, eventos, etapas) {
-  const sev = severidadePrazo(pedido.prazo);
-  const badgeClasse =
-    sev === "red"
-      ? "sy-badge-red"
-      : sev === "amber"
-        ? "sy-badge-amber"
-        : "sy-badge-green";
   const indiceAtual = etapas.findIndex((e) => e.chave === pedido.coluna);
 
   const stepsHtml = etapas
@@ -103,7 +96,7 @@ function desenharTimeline(pedido, eventos, etapas) {
       </div>
       <div class="tl-header-info">
         <div class="tl-info-item"><div class="tl-info-label">Prazo</div><div class="tl-info-value">${formatarDataCurta(pedido.prazo)}</div></div>
-        <div class="tl-info-item"><div class="tl-info-label">Situação</div><div class="tl-info-value"><span class="sy-badge ${badgeClasse}"><span class="sy-dot"></span>${textoPrazo(pedido.prazo)}</span></div></div>
+        <div class="tl-info-item"><div class="tl-info-label">Situação</div><div class="tl-info-value">${badgeSituacao(pedido, etapas[etapas.length - 1]?.chave)}</div></div>
       </div>
     </div>
 

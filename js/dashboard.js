@@ -11,12 +11,19 @@ async function iniciarDashboard() {
   document.getElementById("page-content").innerHTML =
     `<div class="sy-card" style="padding:20px;">Carregando...</div>`;
 
-  let pedidos, etapas, produtos;
+  // Produção e faturamento do mês vêm do relatório (peças CONCLUÍDAS do dia 1º
+  // até hoje) — só Administrador e Gestor têm acesso a relatórios.
+  const veRelatorios = ["Administrador", "Gestor"].includes(usuario.perfil);
+  const mostrarFaturamento = usuario.perfil === "Administrador";
+  const { inicio, fim } = periodoDoMesAtual();
+
+  let pedidos, etapas, produtos, relatorioDoMes;
   try {
-    [pedidos, etapas, produtos] = await Promise.all([
+    [pedidos, etapas, produtos, relatorioDoMes] = await Promise.all([
       apiListarPedidos(),
       carregarEtapas(),
-      apiListarProdutos(),
+      mostrarFaturamento ? apiListarProdutos() : Promise.resolve([]),
+      veRelatorios ? apiRelatorioProducao(inicio, fim) : Promise.resolve(null),
     ]);
   } catch (erro) {
     document.getElementById("page-content").innerHTML =
@@ -25,20 +32,24 @@ async function iniciarDashboard() {
   }
 
   const chaveUltimaEtapa = etapas[etapas.length - 1]?.chave;
+  const ativos = pedidos.filter((p) => p.coluna !== chaveUltimaEtapa);
 
-  const producaoDoMes = pedidos.reduce((s, p) => s + Number(p.qtd), 0);
+  // Vendedor (sem relatório): mostra quanto ele tem em produção agora
+  const producaoDoMes = veRelatorios
+    ? relatorioDoMes.totalPecas
+    : ativos.reduce((s, p) => s + Number(p.qtd), 0);
   const percentualMeta = Math.min(
     100,
     Math.round((producaoDoMes / META_PRODUCAO_MES) * 100),
   );
-  const ordensEmAndamento = pedidos.filter(
-    (p) => p.coluna !== chaveUltimaEtapa,
-  ).length;
-  const lotesEmAtraso = pedidos.filter(
+  const ordensEmAndamento = ativos.length;
+  // Concluído não é atraso, mesmo com o prazo no passado
+  const lotesEmAtraso = ativos.filter(
     (p) => severidadePrazo(p.prazo) === "red",
   ).length;
-  const faturamentoDoMes = calcularFaturamento(pedidos, produtos);
-  const mostrarFaturamento = usuario.perfil === "Administrador";
+  const faturamentoDoMes = mostrarFaturamento
+    ? calcularFaturamento(relatorioDoMes.pedidos, produtos)
+    : 0;
 
   const raio = 60,
     circunferencia = 2 * Math.PI * raio;
@@ -98,9 +109,9 @@ async function iniciarDashboard() {
   document.getElementById("page-content").innerHTML = `
     <div class="db-metrics">
       <div class="sy-card db-metric">
-        <div class="db-metric-label">Produção do mês</div>
+        <div class="db-metric-label">${veRelatorios ? "Produção do mês" : "Peças em produção"}</div>
         <div class="db-metric-value">${producaoDoMes.toLocaleString("pt-BR")}<span style="font-size:15px;color:var(--sy-ink-soft);font-weight:500;"> peças</span></div>
-        <div class="db-metric-foot"><span class="sy-badge sy-badge-blue"><span class="sy-dot"></span>${percentualMeta}% da meta</span></div>
+        <div class="db-metric-foot"><span class="sy-badge sy-badge-blue"><span class="sy-dot"></span>${veRelatorios ? `${percentualMeta}% da meta` : "nos seus pedidos ativos"}</span></div>
       </div>
       <div class="sy-card db-metric">
         <div class="db-metric-label">Ordens em andamento</div>
@@ -123,7 +134,10 @@ async function iniciarDashboard() {
           : ""
       }
     </div>
-    <div class="db-row-2">
+    <div class="db-row-2" ${veRelatorios ? "" : 'style="grid-template-columns:1fr;"'}>
+      ${
+        veRelatorios
+          ? `
       <div class="sy-card db-donut-wrap">
         <div class="sy-card-header" style="padding:0;align-self:flex-start;"><h2 class="sy-card-title">Meta mensal</h2></div>
         <div class="db-donut-figure">
@@ -134,8 +148,10 @@ async function iniciarDashboard() {
           </svg>
           <div class="db-donut-center"><div class="db-donut-pct">${percentualMeta}%</div><div class="db-donut-caption">da meta</div></div>
         </div>
-        <div class="db-donut-legend"><b>${producaoDoMes.toLocaleString("pt-BR")}</b> de <b>${META_PRODUCAO_MES.toLocaleString("pt-BR")}</b> peças</div>
-      </div>
+        <div class="db-donut-legend"><b>${producaoDoMes.toLocaleString("pt-BR")}</b> de <b>${META_PRODUCAO_MES.toLocaleString("pt-BR")}</b> peças concluídas</div>
+      </div>`
+          : ""
+      }
       <div class="sy-card db-pipeline">
         <div class="sy-card-header" style="padding:0;">
           <h2 class="sy-card-title">Ordens por etapa</h2>

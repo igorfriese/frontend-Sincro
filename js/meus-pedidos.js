@@ -27,8 +27,11 @@ async function iniciarMeusPedidos() {
     );
 
   const emAndamento = meus.filter((p) => p.coluna !== chaveUltimaEtapa).length;
+  // Pedido já concluído não conta como atrasado, mesmo com o prazo no passado
   const atrasados = meus.filter(
-    (p) => severidadePrazo(p.prazo) === "red",
+    (p) =>
+      !pedidoConcluido(p, chaveUltimaEtapa) &&
+      severidadePrazo(p.prazo) === "red",
   ).length;
 
   document.getElementById("page-content").innerHTML = `
@@ -52,13 +55,6 @@ async function iniciarMeusPedidos() {
     document.getElementById("mpLista").innerHTML = filtrados.length
       ? filtrados
           .map((p) => {
-            const sev = severidadePrazo(p.prazo);
-            const badgeClasse =
-              sev === "red"
-                ? "sy-badge-red"
-                : sev === "amber"
-                  ? "sy-badge-amber"
-                  : "sy-badge-green";
             const etapaInfo = etapas.find((e) => e.chave === p.coluna);
             return `
         <div class="al-item" onclick="window.location.href='timeline.html?id=${p.id}'">
@@ -67,7 +63,7 @@ async function iniciarMeusPedidos() {
             <div class="al-item-titulo">${p.urgente ? badgeUrgente() + " " : ""}Pedido #${p.id} — ${escaparHtml(p.cliente)}</div>
             <div class="al-item-sub">${escaparHtml(p.modelo)} • ${escaparHtml(etapaInfo?.nome || p.coluna)} • prazo: ${formatarDataCurta(p.prazo)}</div>
           </div>
-          <span class="sy-badge ${badgeClasse}"><span class="sy-dot"></span>${textoPrazo(p.prazo)}</span>
+          ${badgeSituacao(p, chaveUltimaEtapa)}
         </div>`;
           })
           .join("")

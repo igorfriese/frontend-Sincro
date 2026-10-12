@@ -144,6 +144,7 @@ async function apiListarPedidos() {
     responsavelId: pedido.responsavelId ? String(pedido.responsavelId) : null,
     urgente: pedido.urgente,
     coluna: pedido.coluna,
+    ultimaMovimentacao: pedido.ultimaMovimentacao || null,
   }));
 }
 
@@ -359,6 +360,7 @@ async function apiBuscarPedido(id) {
     responsavelId: pedido.responsavelId ? String(pedido.responsavelId) : null,
     urgente: pedido.urgente,
     coluna: pedido.coluna,
+    ultimaMovimentacao: pedido.ultimaMovimentacao || null,
     clienteTokenAcompanhamento: pedido.cliente?.tokenAcompanhamento || null,
   };
 }

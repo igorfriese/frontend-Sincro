@@ -93,7 +93,12 @@ async function responder(pergunta) {
   // apiListarPedidos já filtra por perfil (Vendedor só recebe os
   // próprios pedidos) — mesma regra do resto do sistema.
   if (pergunta.includes("atrasad")) {
-    const atrasados = pedidos.filter((p) => severidadePrazo(p.prazo) === "red");
+    // Concluído não é atraso, mesmo com o prazo no passado
+    const chaveFinal = etapaFinal(etapasCache)?.chave;
+    const atrasados = pedidos.filter(
+      (p) =>
+        !pedidoConcluido(p, chaveFinal) && severidadePrazo(p.prazo) === "red",
+    );
     if (atrasados.length === 0) {
       adicionarMensagem("bot", "Nenhum pedido atrasado no momento. 🎉");
     } else {
@@ -145,11 +150,16 @@ async function responder(pergunta) {
         true,
       );
     } else {
-      const produtos = await apiListarProdutos();
-      const total = calcularFaturamento(pedidos, produtos);
+      // Mesma conta do Dashboard: peças concluídas do dia 1º até hoje × preço base
+      const { inicio, fim } = periodoDoMesAtual();
+      const [produtos, relatorio] = await Promise.all([
+        apiListarProdutos(),
+        apiRelatorioProducao(inicio, fim),
+      ]);
+      const total = calcularFaturamento(relatorio.pedidos, produtos);
       adicionarMensagem(
         "bot",
-        `O faturamento estimado do mês é R$ ${total.toLocaleString("pt-BR")}.`,
+        `O faturamento estimado do mês (pedidos concluídos até hoje) é R$ ${total.toLocaleString("pt-BR")}.`,
       );
     }
     return;

@@ -25,8 +25,14 @@ async function iniciarAlertas() {
 
   const atrasados = ativos.filter((p) => severidadePrazo(p.prazo) === "red");
   const apertados = ativos.filter((p) => severidadePrazo(p.prazo) === "amber");
-  const semMovimentacao = ativos.filter((p) => diasParaPrazo(p.prazo) < -3);
-  const todosOrdenados = [...atrasados, ...apertados].sort(
+  // Parado = nenhum evento na timeline (movimentação ou anotação) há mais de N dias
+  const semMovimentacao = ativos.filter(
+    (p) => diasSemMovimentacao(p) > LIMITE_SEM_MOVIMENTACAO_DIAS,
+  );
+  // Um pedido pode estar atrasado E parado: aparece uma vez só, pelo motivo mais grave
+  const todosOrdenados = [
+    ...new Set([...atrasados, ...apertados, ...semMovimentacao]),
+  ].sort(
     (a, b) =>
       (b.urgente ? 1 : 0) - (a.urgente ? 1 : 0) ||
       diasParaPrazo(a.prazo) - diasParaPrazo(b.prazo),
@@ -54,11 +60,16 @@ async function iniciarAlertas() {
       ? filtrados
           .map((p) => {
             const sev = severidadePrazo(p.prazo);
-            const icone = sev === "red" ? "⛔" : "⏰";
+            const icone = sev === "red" ? "⛔" : sev === "amber" ? "⏰" : "💤";
             const bg =
               sev === "red" ? "var(--sy-red-tint)" : "var(--sy-amber-tint)";
             const cor = sev === "red" ? "var(--sy-red)" : "var(--sy-amber)";
-            const titulo = sev === "red" ? "Ordem atrasada" : "Prazo apertado";
+            const titulo =
+              sev === "red"
+                ? "Ordem atrasada"
+                : sev === "amber"
+                  ? "Prazo apertado"
+                  : `Sem movimentação há ${diasSemMovimentacao(p)}d`;
             return `
         <div class="al-item" onclick="window.location.href='timeline.html?id=${p.id}'">
           <div class="al-item-icone" style="background:${bg};color:${cor};">${icone}</div>

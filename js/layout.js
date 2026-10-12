@@ -42,6 +42,40 @@ function escaparHtml(valor) {
     .replace(/'/g, "&#39;");
 }
 
+// ---------- Situação do pedido ----------
+// Pedido na etapa final já foi entregue: o prazo dele não vira mais
+// "atrasado" (senão o cliente vê um pedido recebido como atrasado).
+function pedidoConcluido(pedido, chaveEtapaFinal) {
+  return !!chaveEtapaFinal && pedido.coluna === chaveEtapaFinal;
+}
+
+function badgeSituacao(pedido, chaveEtapaFinal) {
+  if (pedidoConcluido(pedido, chaveEtapaFinal)) {
+    return `<span class="sy-badge sy-badge-green"><span class="sy-dot"></span>Concluído</span>`;
+  }
+  const sev = severidadePrazo(pedido.prazo);
+  const classe =
+    sev === "red" ? "sy-badge-red" : sev === "amber" ? "sy-badge-amber" : "sy-badge-green";
+  return `<span class="sy-badge ${classe}"><span class="sy-dot"></span>${textoPrazo(pedido.prazo)}</span>`;
+}
+
+// Pedido parado há mais que isso (sem evento na timeline) entra nos alertas
+const LIMITE_SEM_MOVIMENTACAO_DIAS = 3;
+
+function diasSemMovimentacao(pedido) {
+  if (!pedido.ultimaMovimentacao) return null;
+  return Math.floor((new Date() - new Date(pedido.ultimaMovimentacao)) / 86400000);
+}
+
+// Do dia 1º até hoje, no formato que a API de relatórios espera (yyyy-mm-dd)
+function periodoDoMesAtual() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoje.getDate()).padStart(2, "0");
+  return { inicio: `${ano}-${mes}-01`, fim: `${ano}-${mes}-${dia}` };
+}
+
 function formatarDataCurta(iso) {
   const [ano, mes, dia] = iso.split("T")[0].split("-");
   return `${dia}/${mes}`;
