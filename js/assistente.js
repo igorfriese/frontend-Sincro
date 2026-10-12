@@ -145,7 +145,7 @@ async function responder(pergunta) {
         true,
       );
     } else {
-      const produtos = await apiListar("produtos");
+      const produtos = await apiListarProdutos();
       const total = calcularFaturamento(pedidos, produtos);
       adicionarMensagem(
         "bot",

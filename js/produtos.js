@@ -1,5 +1,8 @@
 let produtosCache = [];
 let editandoIdProduto = null;
+// Cadastrar/editar: Administrador e Gestor. Excluir: só Administrador.
+let podeEditarProdutos = false;
+let podeExcluirProdutos = false;
 
 async function iniciarProdutos() {
   const usuario = montarLayout({
@@ -9,10 +12,13 @@ async function iniciarProdutos() {
   });
   if (!usuario) return;
 
+  podeEditarProdutos = ["Administrador", "Gestor"].includes(usuario.perfil);
+  podeExcluirProdutos = usuario.perfil === "Administrador";
+
   document.getElementById("page-content").innerHTML = `
     <div class="cd-toolbar">
       <div class="kb-search" style="max-width:280px;"><input type="text" id="fBusca" placeholder="Buscar por nome ou código..."></div>
-      <button class="kb-btn-new" id="btnNovo">+ Novo produto</button>
+      ${podeEditarProdutos ? `<button class="kb-btn-new" id="btnNovo">+ Novo produto</button>` : ""}
     </div>
     <div id="erroBox" class="sy-erro-banner" style="display:none;"></div>
     <div class="sy-card">
@@ -27,6 +33,7 @@ async function iniciarProdutos() {
       <div class="sy-card cd-modal">
         <h2 class="sy-card-title" style="margin-bottom:14px;" id="modalTitulo">Novo produto</h2>
         <input class="login-input" id="fNome" placeholder="Nome do modelo">
+        <input class="login-input" id="fDescricao" placeholder="Descrição (opcional)">
         <input class="login-input" id="fPreco" placeholder="Preço base (R$)" type="number" step="0.01">
         <div class="cd-modal-botoes">
           <button class="kb-btn-new cancelar" id="btnCancelar">Cancelar</button>
@@ -38,7 +45,7 @@ async function iniciarProdutos() {
 
   document
     .getElementById("btnNovo")
-    .addEventListener("click", () => abrirModal());
+    ?.addEventListener("click", () => abrirModal());
   document
     .getElementById("btnCancelar")
     .addEventListener("click", () =>
@@ -53,7 +60,7 @@ async function iniciarProdutos() {
 async function carregar() {
   const erroBox = document.getElementById("erroBox");
   try {
-    produtosCache = await apiListar("produtos");
+    produtosCache = await apiListarProdutos();
     erroBox.style.display = "none";
   } catch (erro) {
     erroBox.textContent = `Não foi possível carregar os produtos: ${erro.message}`;
@@ -88,12 +95,12 @@ function renderizarTabela() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><span class="cl-chave">${p.codigo || "—"}</span></td>
-      <td><b>${p.nome}</b></td>
+      <td><b>${p.nome}</b>${p.descricao ? `<div class="al-item-sub">${p.descricao}</div>` : ""}</td>
       <td>R$ ${Number(p.precoBase).toFixed(2)}</td>
       <td>
         <div class="cd-acoes">
-          <button class="cd-btn-icone" data-acao="editar" data-id="${p.id}">Editar</button>
-          <button class="cd-btn-icone excluir" data-acao="excluir" data-id="${p.id}">Excluir</button>
+          ${podeEditarProdutos ? `<button class="cd-btn-icone" data-acao="editar" data-id="${p.id}">Editar</button>` : ""}
+          ${podeExcluirProdutos ? `<button class="cd-btn-icone excluir" data-acao="excluir" data-id="${p.id}">Excluir</button>` : ""}
         </div>
       </td>`;
     corpo.appendChild(tr);
@@ -113,22 +120,29 @@ function renderizarTabela() {
 
 function abrirModal(id = null) {
   editandoIdProduto = id;
-  const produto = id ? produtosCache.find((p) => p.id === id) : null;
+  // ids vêm da API como número; o data-id do botão é texto
+  const produto = id ? produtosCache.find((p) => String(p.id) === String(id)) : null;
   document.getElementById("modalTitulo").textContent = id
     ? "Editar produto"
     : "Novo produto";
   document.getElementById("fNome").value = produto?.nome || "";
+  document.getElementById("fDescricao").value = produto?.descricao || "";
   document.getElementById("fPreco").value = produto?.precoBase || "";
   document.getElementById("modalFundo").classList.add("aberto");
 }
 
 async function salvar() {
+  const atual = produtosCache.find(
+    (p) => String(p.id) === String(editandoIdProduto),
+  );
   const dados = {
     nome: document.getElementById("fNome").value.trim(),
+    descricao: document.getElementById("fDescricao").value.trim(),
     precoBase: Number(document.getElementById("fPreco").value) || 0,
+    estoque: atual?.estoque ?? 0, // a tela não edita estoque: mantém o atual
   };
-  if (!dados.nome) {
-    alert("O nome é obrigatório.");
+  if (!dados.nome || dados.precoBase <= 0) {
+    alert("Nome e preço base (maior que zero) são obrigatórios.");
     return;
   }
 
@@ -136,9 +150,8 @@ async function salvar() {
   botao.disabled = true;
   botao.textContent = "Salvando...";
   try {
-    if (editandoIdProduto)
-      await apiAtualizarItem("produtos", editandoIdProduto, dados);
-    else await apiCriarItem("produtos", dados);
+    if (editandoIdProduto) await apiAtualizarProduto(editandoIdProduto, dados);
+    else await apiCriarProduto(dados);
     document.getElementById("modalFundo").classList.remove("aberto");
     await carregar();
   } catch (erro) {
@@ -149,20 +162,12 @@ async function salvar() {
   }
 }
 
+// A API recusa excluir produto usado em pedidos e devolve a mensagem
 async function excluir(id) {
-  const produto = produtosCache.find((p) => p.id === id);
-  const pedidos = await apiListarTodosPedidos();
-  const qtdPedidos = pedidos.filter((p) => p.modelo === produto.nome).length;
-  if (qtdPedidos > 0) {
-    alert(
-      `Não é possível excluir "${produto.nome}": existem ${qtdPedidos} pedido(s) usando esse modelo.`,
-    );
-    return;
-  }
-
-  if (!confirm("Excluir este produto?")) return;
+  const produto = produtosCache.find((p) => String(p.id) === String(id));
+  if (!confirm(`Excluir o produto "${produto?.nome}"?`)) return;
   try {
-    await apiExcluirItem("produtos", id);
+    await apiExcluirProduto(id);
     await carregar();
   } catch (erro) {
     alert(`Não foi possível excluir: ${erro.message}`);

@@ -1,5 +1,9 @@
 let clientesCache = [];
 let editandoId = null;
+// Cadastrar/editar: Administrador e Gestor. Excluir: só Administrador.
+// O Vendedor só consulta (e não recebe o link do portal).
+let podeEditarClientes = false;
+let podeExcluirClientes = false;
 
 async function iniciarClientes() {
   const usuario = montarLayout({
@@ -9,10 +13,13 @@ async function iniciarClientes() {
   });
   if (!usuario) return;
 
+  podeEditarClientes = ["Administrador", "Gestor"].includes(usuario.perfil);
+  podeExcluirClientes = usuario.perfil === "Administrador";
+
   document.getElementById("page-content").innerHTML = `
     <div class="cd-toolbar">
       <div class="kb-search" style="max-width:280px;"><input type="text" id="fBusca" placeholder="Buscar por nome ou código..."></div>
-      <button class="kb-btn-new" id="btnNovo">+ Novo cliente</button>
+      ${podeEditarClientes ? `<button class="kb-btn-new" id="btnNovo">+ Novo cliente</button>` : ""}
     </div>
     <div id="erroBox" class="sy-erro-banner" style="display:none;"></div>
     <div class="sy-card">
@@ -27,9 +34,10 @@ async function iniciarClientes() {
       <div class="sy-card cd-modal">
         <h2 class="sy-card-title" style="margin-bottom:14px;" id="modalTitulo">Novo cliente</h2>
         <input class="login-input" id="fNome" placeholder="Nome da confecção">
-        <input class="login-input" id="fDocumento" placeholder="CNPJ" data-only-numbers>
+        <input class="login-input" id="fDocumento" placeholder="CNPJ (14 dígitos)" data-only-numbers>
         <input class="login-input" id="fTelefone" placeholder="Telefone" data-only-numbers>
         <input class="login-input" id="fEmail" placeholder="E-mail" type="email" data-no-numbers>
+        <input class="login-input" id="fEndereco" placeholder="Endereço (opcional)">
         <div class="cd-modal-botoes">
           <button class="kb-btn-new cancelar" id="btnCancelar">Cancelar</button>
           <button class="kb-btn-new" id="btnSalvar">Salvar</button>
@@ -40,7 +48,7 @@ async function iniciarClientes() {
 
   document
     .getElementById("btnNovo")
-    .addEventListener("click", () => abrirModal());
+    ?.addEventListener("click", () => abrirModal());
   document.getElementById("btnCancelar").addEventListener("click", fecharModal);
   document.getElementById("btnSalvar").addEventListener("click", salvar);
   document.getElementById("fBusca").addEventListener("input", renderizarTabela);
@@ -51,7 +59,7 @@ async function iniciarClientes() {
 async function carregar() {
   const erroBox = document.getElementById("erroBox");
   try {
-    clientesCache = await apiListar("clientes");
+    clientesCache = await apiListarClientes();
     erroBox.style.display = "none";
   } catch (erro) {
     erroBox.textContent = `Não foi possível carregar os clientes: ${erro.message}`;
@@ -83,7 +91,9 @@ function renderizarTabela() {
   vazio.style.display = "none";
 
   filtrados.forEach((c) => {
-    const linkPublico = `${window.location.href.split("clientes.html")[0]}portal-cliente.html?token=${c.tokenAcompanhamento}`;
+    const linkPublico = c.tokenAcompanhamento
+      ? `${window.location.href.split("clientes.html")[0]}portal-cliente.html?token=${c.tokenAcompanhamento}`
+      : null;
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><span class="cl-chave">${c.codigo || "—"}</span></td>
@@ -93,9 +103,9 @@ function renderizarTabela() {
       <td>${c.email || "—"}</td>
       <td>
         <div class="cd-acoes">
-          <button class="cd-btn-icone" data-acao="link" data-id="${c.id}" data-link="${linkPublico}">Copiar link</button>
-          <button class="cd-btn-icone" data-acao="editar" data-id="${c.id}">Editar</button>
-          <button class="cd-btn-icone excluir" data-acao="excluir" data-id="${c.id}">Excluir</button>
+          ${linkPublico ? `<button class="cd-btn-icone" data-acao="link" data-id="${c.id}" data-link="${linkPublico}">Copiar link</button>` : ""}
+          ${podeEditarClientes ? `<button class="cd-btn-icone" data-acao="editar" data-id="${c.id}">Editar</button>` : ""}
+          ${podeExcluirClientes ? `<button class="cd-btn-icone excluir" data-acao="excluir" data-id="${c.id}">Excluir</button>` : ""}
         </div>
       </td>`;
     corpo.appendChild(tr);
@@ -129,7 +139,8 @@ function renderizarTabela() {
 
 function abrirModal(id = null) {
   editandoId = id;
-  const cliente = id ? clientesCache.find((c) => c.id === id) : null;
+  // ids vêm da API como número; o data-id do botão é texto
+  const cliente = id ? clientesCache.find((c) => String(c.id) === String(id)) : null;
 
   document.getElementById("modalTitulo").textContent = id
     ? "Editar cliente"
@@ -138,6 +149,7 @@ function abrirModal(id = null) {
   document.getElementById("fDocumento").value = cliente?.documento || "";
   document.getElementById("fTelefone").value = cliente?.telefone || "";
   document.getElementById("fEmail").value = cliente?.email || "";
+  document.getElementById("fEndereco").value = cliente?.endereco || "";
   document.getElementById("modalFundo").classList.add("aberto");
 }
 
@@ -151,9 +163,10 @@ async function salvar() {
     documento: document.getElementById("fDocumento").value.trim(),
     telefone: document.getElementById("fTelefone").value.trim(),
     email: document.getElementById("fEmail").value.trim(),
+    endereco: document.getElementById("fEndereco").value.trim(),
   };
-  if (!dados.nome) {
-    alert("O nome é obrigatório.");
+  if (!dados.nome || !dados.documento) {
+    alert("Nome e CNPJ são obrigatórios.");
     return;
   }
 
@@ -162,8 +175,8 @@ async function salvar() {
   botao.textContent = "Salvando...";
 
   try {
-    if (editandoId) await apiAtualizarItem("clientes", editandoId, dados);
-    else await apiCriarItem("clientes", dados);
+    if (editandoId) await apiAtualizarCliente(editandoId, dados);
+    else await apiCriarCliente(dados);
     fecharModal();
     await carregar();
   } catch (erro) {
@@ -174,20 +187,12 @@ async function salvar() {
   }
 }
 
+// A API recusa excluir cliente com pedidos e devolve a mensagem
 async function excluir(id) {
-  const cliente = clientesCache.find((c) => c.id === id);
-  const pedidos = await apiListarTodosPedidos();
-  const qtdPedidos = pedidos.filter((p) => p.cliente === cliente.nome).length;
-  if (qtdPedidos > 0) {
-    alert(
-      `Não é possível excluir "${cliente.nome}": existem ${qtdPedidos} pedido(s) associados a esse cliente.`,
-    );
-    return;
-  }
-
-  if (!confirm("Excluir este cliente?")) return;
+  const cliente = clientesCache.find((c) => String(c.id) === String(id));
+  if (!confirm(`Excluir o cliente "${cliente?.nome}"?`)) return;
   try {
-    await apiExcluirItem("clientes", id);
+    await apiExcluirCliente(id);
     await carregar();
   } catch (erro) {
     alert(`Não foi possível excluir: ${erro.message}`);

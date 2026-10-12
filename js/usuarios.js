@@ -62,7 +62,7 @@ async function iniciarUsuarios() {
 async function carregar() {
   const erroBox = document.getElementById("erroBox");
   try {
-    usuariosCache = await apiListar("usuarios");
+    usuariosCache = await apiListarUsuarios();
     erroBox.style.display = "none";
   } catch (erro) {
     erroBox.textContent = `Não foi possível carregar os usuários: ${erro.message}`;
@@ -159,6 +159,7 @@ async function salvar() {
   }
   if (!dados.senha) delete dados.senha;
 
+  // A API também protege o último Administrador; isso aqui só evita a viagem
   if (editandoIdUsuario) {
     const registroAtual = usuariosCache.find((u) => u.id === editandoIdUsuario);
     if (
@@ -180,19 +181,15 @@ async function salvar() {
   botao.textContent = "Salvando...";
   try {
     if (editandoIdUsuario) {
-      const atualizado = await apiAtualizarItem(
-        "usuarios",
-        editandoIdUsuario,
-        dados,
-      );
+      const atualizado = await apiAtualizarUsuario(editandoIdUsuario, dados);
+      // Editou a si mesmo: atualiza nome/email do topo. Um perfil novo
+      // só vale no token depois de sair e entrar de novo.
       if (editandoIdUsuario === usuarioAtualUsuarios.id) {
-        const atualizadoPublico = { ...atualizado };
-        delete atualizadoPublico.senha;
-        salvarSessao(tokenSalvo(), atualizadoPublico);
-        usuarioAtualUsuarios = atualizadoPublico;
+        salvarSessao(tokenSalvo(), atualizado);
+        usuarioAtualUsuarios = atualizado;
       }
     } else {
-      await apiCriarItem("usuarios", dados);
+      await apiCriarUsuario(dados);
     }
     fecharModal();
     await carregar();
@@ -225,7 +222,7 @@ async function excluir(id) {
 
   if (!confirm("Excluir este usuário? Ele perde o acesso ao sistema.")) return;
   try {
-    await apiExcluirItem("usuarios", id);
+    await apiExcluirUsuario(id);
     await carregar();
   } catch (erro) {
     alert(`Não foi possível excluir: ${erro.message}`);
