@@ -38,7 +38,8 @@ function desenharTimeline(pedido, eventos, etapas) {
       const eventoDaEtapa = eventos.find((ev) => ev.etapa === etapa.chave);
       let estado = "pendente";
       if (i < indiceAtual) estado = "concluido";
-      if (i === indiceAtual) estado = "atual";
+      // Na etapa final o pedido terminou: ela também aparece como concluída
+      if (i === indiceAtual) estado = i === etapas.length - 1 ? "concluido" : "atual";
       const icone = estado === "concluido" ? "✓" : i + 1;
       return `
       <div class="tl-step ${estado}">
@@ -103,7 +104,7 @@ function desenharTimeline(pedido, eventos, etapas) {
     <div class="sy-card" style="padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
       <div style="flex:1;min-width:240px;">
         <div class="login-label" style="margin-bottom:3px;">Link do cliente (mostra todos os pedidos dele)</div>
-        <div id="tlLinkTexto" style="font-family:var(--sy-font-mono);font-size:12px;color:var(--sy-ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${linkPublico || "Cliente não cadastrado — link indisponível"}</div>
+        <div id="tlLinkTexto" style="font-family:var(--sy-font-mono);font-size:12px;color:var(--sy-ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${linkPublico || "Link disponível só para Administrador e Gestor"}</div>
       </div>
       ${linkPublico ? `<button class="kb-btn-new" id="tlCopiarLink" style="flex-shrink:0;">Copiar link</button>` : ""}
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;flex-shrink:0;">

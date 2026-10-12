@@ -197,7 +197,9 @@ function exportarCsv() {
       p.concluidoEm.split("T")[0],
       p.pontual ? "No prazo" : "Atrasado",
     ]
-      .map((valor) => `"${String(valor).replace(/"/g, '""')}"`)
+      // Texto começando com = + - @ vira fórmula no Excel: o apóstrofo neutraliza
+      .map((valor) => String(valor).replace(/^[=+\-@]/, "'$&"))
+      .map((valor) => `"${valor.replace(/"/g, '""')}"`)
       .join(";");
   });
 

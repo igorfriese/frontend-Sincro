@@ -123,7 +123,14 @@ async function alternarPedido(pedido) {
   }
 
   if (!painel.dataset.carregado) {
-    const eventos = await apiEventosDoPedidoPublico(tokenAtual, pedido.id);
+    let eventos;
+    try {
+      eventos = await apiEventosDoPedidoPublico(tokenAtual, pedido.id);
+    } catch (erro) {
+      painel.innerHTML = `<div class="sy-erro-banner" style="margin-top:10px;">${escaparHtml(erro.message)}</div>`;
+      painel.style.display = "block";
+      return;
+    }
     const indiceAtual = etapasPortal.findIndex(
       (e) => e.chave === pedido.coluna,
     );
@@ -133,7 +140,8 @@ async function alternarPedido(pedido) {
         const eventoDaEtapa = eventos.find((ev) => ev.etapa === etapa.chave);
         let estado = "pendente";
         if (i < indiceAtual) estado = "concluido";
-        if (i === indiceAtual) estado = "atual";
+        // Na etapa final o pedido terminou: ela também aparece como concluída
+        if (i === indiceAtual) estado = i === etapasPortal.length - 1 ? "concluido" : "atual";
         const icone = estado === "concluido" ? "✓" : i + 1;
         return `
         <div class="tl-step ${estado}">
