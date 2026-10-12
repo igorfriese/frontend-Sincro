@@ -272,6 +272,33 @@ async function apiExcluirItem(colecao, id) {
   return { deletado: true };
 }
 
+// ---------- Relatórios (Administrador e Gestor) ----------
+// Período opcional (yyyy-mm-dd): sem datas, o servidor considera todos
+// os pedidos finalizados. O cálculo (conclusão, pontualidade, tempo
+// médio) é feito na API; aqui só traduz pro formato das telas.
+async function apiRelatorioProducao(dataInicio, dataFim) {
+  const params = new URLSearchParams();
+  if (dataInicio) params.set("dataInicio", dataInicio);
+  if (dataFim) params.set("dataFim", dataFim);
+  const query = params.toString() ? `?${params}` : "";
+
+  const dados = await apiRequest(`/relatorios/producao${query}`);
+
+  return {
+    ...dados,
+    pedidos: dados.pedidos.map((pedido) => ({
+      id: String(pedido.id),
+      cliente: pedido.cliente,
+      modelo: pedido.modelo,
+      qtd: pedido.quantidade,
+      prazo: pedido.prazo?.split("T")[0] || "",
+      concluidoEm: pedido.concluidoEm,
+      iniciadoEm: pedido.iniciadoEm,
+      pontual: pedido.pontual,
+    })),
+  };
+}
+
 // ---------- Portal do Cliente — rota "pública" (não olha sessão nenhuma) ----------
 // O link é por CLIENTE, não por pedido: mostra todos os pedidos dele.
 async function apiAcompanharCliente(tokenPublico) {
