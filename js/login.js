@@ -23,6 +23,13 @@ document
     }
   });
 
+// Veio de uma sessão expirada (api-client.js): avisa em vez de só mostrar o form
+if (new URLSearchParams(window.location.search).get("sessao") === "expirada") {
+  const avisoBox = document.getElementById("loginErro");
+  avisoBox.textContent = "Sua sessão expirou. Entre novamente.";
+  avisoBox.style.display = "block";
+}
+
 // Se já estiver logado, pula direto pro dashboard
 if (usuarioLogado() && tokenSalvo()) {
   window.location.href = "dashboard.html";

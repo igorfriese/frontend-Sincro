@@ -1,11 +1,11 @@
 // ===================================================================
 // REGRAS DE NEGÓCIO COMPARTILHADAS
 // ===================================================================
-// As etapas do pipeline agora são dinâmicas — configuráveis pelo
-// Administrador na tela colunas.html. Isso substitui o antigo array
-// fixo ETAPAS: toda tela que precisa das etapas chama carregarEtapas().
+// As etapas do pipeline são dinâmicas — configuráveis pelo Administrador
+// no Kanban. Toda tela que precisa delas chama carregarEtapas(), que lê
+// da API (rota pública, então funciona também no portal do cliente).
 async function carregarEtapas() {
-  const lista = await apiListar("etapas");
+  const lista = await apiListarEtapas();
   return lista.slice().sort((a, b) => a.ordem - b.ordem);
 }
 
