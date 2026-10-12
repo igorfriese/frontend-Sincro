@@ -237,13 +237,8 @@ async function salvar(idEdicao) {
     if (idEdicao) {
       await apiAtualizarPedido(idEdicao, dados);
     } else {
-      const criado = await apiCriarPedido(dados);
-
-      await apiCriarEvento({
-        pedidoId: criado.id,
-        etapa: criado.coluna,
-        observacao: "Ordem de produção criada.",
-      });
+      // O servidor já registra o evento "Ordem de produção criada."
+      await apiCriarPedido(dados);
     }
     window.location.href = "kanban.html";
   } catch (erro) {

@@ -190,17 +190,29 @@ function desenharTimeline(pedido, eventos, etapas) {
         return;
       }
 
+      if (novaEtapa === pedido.coluna && !observacao) {
+        erroBox.textContent =
+          "Escolha outra etapa ou escreva uma observação para registrar.";
+        erroBox.style.display = "block";
+        return;
+      }
+
       botao.disabled = true;
       botao.textContent = "Registrando...";
       erroBox.style.display = "none";
 
       try {
-        await apiCriarEvento({
-          pedidoId: pedido.id,
-          etapa: novaEtapa,
-          observacao,
-        });
-        await apiAtualizarPedido(pedido.id, { coluna: novaEtapa });
+        if (novaEtapa === pedido.coluna) {
+          // Mesma etapa: é só uma anotação na timeline
+          await apiCriarEvento({
+            pedidoId: Number(pedido.id),
+            etapa: novaEtapa,
+            observacao,
+          });
+        } else {
+          // Mudança de etapa: o servidor valida e registra o evento com a observação
+          await apiAlterarEtapa(pedido.id, novaEtapa, observacao);
+        }
         const pedidoAtualizado = await apiBuscarPedido(pedido.id);
         const eventosAtualizados = await apiListarEventosDoPedido(pedido.id);
         desenharTimeline(pedidoAtualizado, eventosAtualizados, etapas);

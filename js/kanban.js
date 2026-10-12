@@ -227,6 +227,7 @@ function renderizarBoard() {
       pedido.coluna = etapa.chave;
       renderizarBoard();
 
+      // O servidor registra o evento da movimentação na timeline
       try {
         await apiAlterarEtapa(id, etapa.chave);
       } catch (erro) {
@@ -234,20 +235,6 @@ function renderizarBoard() {
         renderizarBoard();
 
         alert(`Não foi possível mover a ordem: ${erro.message}`);
-      }
-
-      try {
-        await apiCriarEvento({
-          pedidoId: Number(id),
-          etapa: etapa.chave,
-          observacao: `Pedido movido pelo kanban para "${etapa.nome}".`,
-        });
-      } catch (erro) {
-        console.error("Erro ao registrar evento:", erro);
-
-        alert(
-          `A ordem foi movida para "${etapa.nome}", mas não foi possível registar o evento na Timeline: ${erro.message}`,
-        );
       }
     });
 
@@ -309,29 +296,18 @@ function criarCard(pedido, cor) {
         return;
       }
 
+      // O servidor registra o evento da finalização na timeline
       try {
-        await apiAlterarEtapa(pedido.id, etapaUltima.chave);
+        await apiAlterarEtapa(
+          pedido.id,
+          etapaUltima.chave,
+          `Pedido finalizado na etapa "${etapaUltima.nome}".`,
+        );
 
         pedido.coluna = etapaUltima.chave;
         renderizarBoard();
       } catch (erro) {
         alert(`Não foi possível finalizar: ${erro.message}`);
-
-        return;
-      }
-
-      try {
-        await apiCriarEvento({
-          pedidoId: Number(pedido.id),
-          etapa: etapaUltima.chave,
-          observacao: `Pedido finalizado na etapa "${etapaUltima.nome}".`,
-        });
-      } catch (erro) {
-        console.error("Erro ao registrar a finalização", erro);
-
-        alert(
-          `O pedido foi finalizado, mas não foi possível registrar o evento: ${erro.message}`,
-        );
       }
     });
   }
